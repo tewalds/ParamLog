@@ -1,0 +1,7 @@
+This is a web interface for a distributed game testing and parameter tuning 
+framework. The website has an API that worker processes use to request work
+and report results. The website gives work based on priorities set by the user,
+then displays graphs of the results.
+
+The web component lives in www/, while the worker process lives in bin/.
+

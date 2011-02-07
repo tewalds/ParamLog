@@ -1,0 +1,47 @@
+
+
+game
+- userid
+- id
+- player1
+- player2
+- nummoves
+- time (when it happened)
+- timelimit
+- outcome1
+- outcome2
+- outcomeref
+- comments
+
+
+moves
+- id
+- gameid
+- move num
+- position
+- player (1/2)
+- value
+- outcome (solved)
+- time_taken
+- work (simulations, nodes, whatever)
+- comment
+
+
+
+users
+- userid
+- email
+- password
+- state (new/active)
+- apikey
+- gamename
+- programname
+
+session - valid if (time() > activetime + timeout)
+- userid
+- key
+- logintime
+- activetime
+- timeout
+
+
