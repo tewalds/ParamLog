@@ -7,14 +7,22 @@ function def( & $var, $def){
 class PHPRouter {
 	public $paths;
 	public $errors;
+	public $auths;
 
 	function __construct(){
 		$this->paths = array("GET" => array(), "POST" => array());
 		$this->errors = array("404" => array($this, "fourohfour"));
+		$this->auths = array();
 	}
 
-	function add($type, $url, $file, $function, $inputs){
-		$this->paths[$type][$url] = new PathNode($type, $url, $file, $function, $inputs);
+	function addauth($type){
+		$this->auths[$type] = $type;
+	}
+
+	function add($type, $url, $file, $function, $auth, $inputs){
+		if(!isset($this->auths[$auth]))
+			die("Unknown auth type $auth\n");
+		$this->paths[$type][$url] = new PathNode($type, $url, $file, $function, $auth, $inputs);
 	}
 
 	function route(){
@@ -25,7 +33,7 @@ class PHPRouter {
 		$url = $url[0];
 
 		if(!isset($this->paths[$type][$url]))
-			return new Route(null, $this->errors["404"], null);
+			return new Route(null, $this->errors["404"], 'any', null);
 
 		$node = $this->paths[$type][$url];
 
@@ -37,7 +45,7 @@ class PHPRouter {
 				$data[$k] = $this->validate($source, $k, $v);
 		}
 
-		return new Route($node->file, $node->function, $data);
+		return new Route($node->file, $node->function, $node->auth, $data);
 	}
 
 	function validate($source, $key, $type){
@@ -105,13 +113,15 @@ class PathNode {
 	public $url;
 	public $file;
 	public $function;
+	public $auth;
 	public $inputs;
 
-	function __construct($type, $url, $file, $function, $inputs){
+	function __construct($type, $url, $file, $function, $auth, $inputs){
 		$this->type = $type;
 		$this->url = $url;
 		$this->file = $file;
 		$this->function = $function;
+		$this->auth = $auth;
 		$this->inputs = $inputs;
 	}
 }
@@ -119,11 +129,13 @@ class PathNode {
 class Route {
 	public $file;
 	public $function;
+	public $auth;
 	public $data;
 
-	function __construct($file, $function, $data){
+	function __construct($file, $function, $auth, $data){
 		$this->file = $file;
 		$this->function = $function;
+		$this->auth = $auth;
 		$this->data = $data;
 	}
 }

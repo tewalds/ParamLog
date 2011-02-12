@@ -4,33 +4,78 @@ error_reporting(E_ALL);
 include("include/config.php");
 include("include/router.php");
 include("include/lib.php");
+include("include/auth.php");
 
 $router = new PHPRouter();
 
-$router->add("GET", "/",     "home.php", "home", null);
-$router->add("GET", "/info", "home.php", "info", null);
-$router->add("GET", "/get",  "home.php", "get", array("test" => "string"));
-$router->add("POST","/post", "home.php", "post", array("test" => "string"));
+$router->addauth("any");   //might be logged in
+$router->addauth("anon");  //must not be logged in
+$router->addauth("user");  //must be logged in
+$router->addauth("admin"); //must be logged in and have admin priviledges
+$router->addauth("api");   //must be using a valid api key
 
-$router->add("GET", "/results",        "results.php", "showresults", array("baselines" => "array", "times" => "array", "players" => "array", "errorbars" => "bool", "simpledata" => "bool", "data" => "bool", "scale" => "bool"));
-$router->add("GET", "/results/hosts",  "results.php", "gethosts", null);
-$router->add("GET", "/results/recent", "results.php", "getrecent", null);
+$router->add("GET", "/",     "home.php", "home", 'any', null);
+$router->add("GET", "/info", "home.php", "info", 'any',  null);
 
-$router->add("GET",  "/players",        "players.php", "players_list",   null);
-$router->add("POST", "/players/route",  "players.php", "players_route",  array("action" => "string", "check" => "array", "weight" => "int"));
-$router->add("POST", "/players/update", "players.php", "players_update", array("players" => "array", "names" => "array", "weights" => "array", "params" => "array"));
-$router->add("POST", "/players/add",    "players.php", "players_add",    array("names" => "array", "weights" => "array", "params" => "array"));
+$router->add("POST","/login",  "account.php", "login",  'anon',  array("email" => "string", "password" => "string", "longsession" => "bool"));
+$router->add("GET", "/logout", "account.php", "logout", 'user',  null);
 
-$router->add("GET", "/api/getwork", "api.php", "getwork", null);
-$router->add("POST","/api/submit",  "api.php", "submit", array("baseline" => "int", "player" => "int", "size" => "int", "time" => "int", "outcome" => "int", "log" => "string"));
+$router->add("GET", "/createuser",    "account.php", "createuser",    'anon',  array("email" => "string", "password" => "string"));
+$router->add("POST","/createuser",    "account.php", "createuser",    'anon',  array("email" => "string", "password" => "string"));
+$router->add("GET", "/activate",      "account.php", "activate",      'anon',  array("email" => "string", "key" => "string"));
+$router->add("POST","/activate",      "account.php", "activate",      'anon',  array("email" => "string", "key" => "string"));
+$router->add("GET", "/lostpassword",  "account.php", "lostpassword",  'anon',  array("email" => "string"));
+$router->add("POST","/lostpassword",  "account.php", "lostpassword",  'anon',  array("email" => "string"));
+$router->add("GET", "/resetpassword", "account.php", "resetpassword", 'anon',  array("email" => "string", "key" => "string", "newpass" => "string"));
+$router->add("POST","/resetpassword", "account.php", "resetpassword", 'anon',  array("email" => "string", "key" => "string", "newpass" => "string"));
+
+$router->add("GET", "/results",        "results.php", "showresults", 'user', array("baselines" => "array", "times" => "array", "players" => "array", "errorbars" => "bool", "simpledata" => "bool", "data" => "bool", "scale" => "bool"));
+$router->add("GET", "/results/hosts",  "results.php", "gethosts",    'user', null);
+$router->add("GET", "/results/recent", "results.php", "getrecent",   'user', null);
+
+$router->add("GET",  "/players",        "players.php", "players_list",   'user', null);
+$router->add("POST", "/players/route",  "players.php", "players_route",  'user', array("action" => "string", "check" => "array", "weight" => "int"));
+$router->add("POST", "/players/update", "players.php", "players_update", 'user', array("players" => "array", "names" => "array", "weights" => "array", "params" => "array"));
+$router->add("POST", "/players/add",    "players.php", "players_add",    'user', array("names" => "array", "weights" => "array", "params" => "array"));
+
+$router->add("GET", "/api/getwork", "api.php", "getwork", 'api', null);
+$router->add("POST","/api/submit",  "api.php", "submit",  'api', array("baseline" => "int", "player" => "int", "size" => "int", "time" => "int", "outcome" => "int", "log" => "string"));
 
 
 $route = $router->route();
 
+$user = auth(def($_COOKIE['session'], ''));
+switch($route->auth){
+	case 'any':
+		break;
+
+	case 'anon':
+		if($user->userid)
+			redirect("/");
+		break;
+
+	case 'user':
+		if($user->userid == 0)
+			redirect("/");
+		break;
+
+	case 'admin':
+		if($user->userid == 0 || !$user->admin)
+			redirect("/");
+		break;
+
+	case 'api':
+		trigger_error("api authentication needs doing still...", E_USER_ERROR);
+
+	default:
+		die("This route has an unknown auth type: " . $route->auth);
+}
+
+
 ob_start();
 if($route->file)
-	require($route->file);
-$ret = call_user_func($route->function, $route->data);
+	require("pages/" . $route->file);
+$ret = call_user_func($route->function, $route->data, $user);
 $body = ob_get_clean();
 
 if($ret){

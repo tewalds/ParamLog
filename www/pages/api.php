@@ -1,6 +1,6 @@
 <?
 
-function getwork($data){
+function getwork($data, $user){
 	global $db;
 	
 	$res = $db->query(
@@ -37,7 +37,7 @@ function getwork($data){
 	return false;
 }
 
-function submit($data){
+function submit($data, $user){
 	global $db;
 
 	$db->pquery("INSERT INTO results SET baseline = ?, player = ?, size = ?, time = ?, weight = 1, wins = ?, losses = ?, ties = ?, numgames = 1
@@ -53,7 +53,7 @@ function submit($data){
 	return false;
 }
 
-function resetresults($data){
+function resetresults($data, $user){
 	global $db;
 
 	$db->query("TRUNCATE results");

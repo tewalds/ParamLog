@@ -1,4 +1,46 @@
 
+players
+- userid
+- id
+- parent
+- type (program, baseline, testgroup, specialization, person)
+- name
+- param
+- weight
+- comment
+
+round robin of baselines
+baselines against test specializations of the same program
+
+SELECT
+	baselines.baseline AS b,
+	baselines.params AS bp,
+	players.player AS p,
+	players.params AS pp,
+	sizes.size AS s,
+	sizes.params AS sp,
+	times.time AS t,
+	times.params AS tp
+FROM 
+	baselines
+	JOIN players
+	JOIN sizes
+	JOIN times 
+	LEFT JOIN results USING (baseline, player, size, time)
+WHERE
+	baselines.weight > 0 AND
+	players.weight > 0 AND
+	sizes.weight > 0 AND
+	times.weight > 0 AND
+	(results.weight IS NULL OR results.weight > 0)
+ORDER BY
+	(results.numgames / (baselines.weight * players.weight * sizes.weight * times.weight * IF(results.weight IS NULL, 1, results.weight))) ASC, 
+	RAND() 
+LIMIT 1
+
+
+
+
 
 game
 - userid
@@ -32,7 +74,8 @@ users
 - userid
 - email
 - password
-- state (new/active)
+- active (y/n)
+- activatekey
 - apikey
 - gamename
 - programname

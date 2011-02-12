@@ -1,26 +1,36 @@
 <?
 
-function home($data){
+function home($data, $user){
 ?>
-<h1>This is the body!</h1><br>
-Get: <form method="get" action="/get"><input name="test"><input type="submit"></form><br>
-Post: <form method="post" action="/post"><input name="test"><input type="submit"></form><br>
+<table><tr><td valign="top">
+
+<h1>Welcome to ParamLog</h1>
+ParamLog is an open source web-based distributed parameter tuning and game logging system. 
+The code is available at <a href="https://github.com/tewalds/ParamLog">https://github.com/tewalds/ParamLog</a>.<br>
+<br>
+Setup players and tests on the web interface, and start up worker processes on arbitrarily many machines
+which all run the tests and report back results. View the aggregated results in a variety of ways, and download
+individual games for review. Track progress over time, and with different parameters.
+
+</td><td>
+<?
+	if($user->userid == 0){
+		$email = "";
+		$key = "";
+		$longsession = true;
+		include("templates/loginform.php");
+		echo "<br>";
+		include("templates/createuser.php");
+	}
+?>
+</td></tr></table>
 <?
 	return true;
 }
 
-function info($data){
+function info($data, $user){
 	phpinfo();
 
 	return false;
 }
 
-function get($data){
-	print_r($data);
-	return true;
-}
-
-function post($data){
-	print_r($data);
-	return true;
-}

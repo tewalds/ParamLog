@@ -4,7 +4,7 @@ function skin($body){
 ?>
 <html>
 	<head>
-		<title>Havannah</title>
+		<title>ParamLog</title>
 
 <style>
 tr.h, tr.f, th, td.h, td.f { background-color: #DDDDDD; }
@@ -34,6 +34,16 @@ function copyInputRow(tablename, nextrow){
 
 	</head>
 	<body>
+
+<div>
+<a href="/">Home</a> |
+<a href="/games">Games</a> |
+<a href="/results">Results</a> |
+<a href="/players">Players</a> |
+<a href="/recent">Recent</a> |
+<a href="/logout">Logout</a>
+<br><br>
+</div>
 
 <?= $body ?>
 

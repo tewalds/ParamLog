@@ -1,6 +1,6 @@
 <?
 
-function players_route($input){
+function players_route($input, $user){
 	switch($input['action']){
 		case 'Set Weight': return players_set_weight($input);
 		case 'Edit'      : return players_edit($input);
@@ -8,7 +8,7 @@ function players_route($input){
 	}
 }
 
-function players_list($input){
+function players_list($input, $user){
 	global $db;
 	
 	$players = $db->query("SELECT * FROM players ORDER BY name")->fetchrowset();
@@ -67,17 +67,17 @@ function players_list($input){
 }
 
 
-function players_set_weight($input){
+function players_set_weight($input, $user){
 	global $db;
 
 	$db->pquery("UPDATE players SET weight = ? WHERE player IN (?)", $input['weight'], $input['check']);
 	
 	echo "Players updated<br>";
 	
-	return players_list($input);
+	return players_list($input, $user);
 }
 
-function players_edit($input){
+function players_edit($input, $user){
 	global $db;
 
 	$players = $db->pquery("SELECT * FROM players WHERE player IN (?) ORDER BY name", $input['check'])->fetchrowset();
@@ -111,7 +111,7 @@ function players_edit($input){
 	return true;
 }
 
-function players_update($input){
+function players_update($input, $user){
 	global $db;
 
 	for($i = 0; $i < count($input['players']); $i++)
@@ -120,10 +120,10 @@ function players_update($input){
 
 	echo "Players Updated<br>\n";
 	
-	return players_list(array());
+	return players_list(array(), $user);
 }
 
-function players_add($input){
+function players_add($input, $user){
 	global $db;
 
 	for($i = 0; $i < count($input['names']); $i++){
@@ -136,6 +136,6 @@ function players_add($input){
 		else
 			echo $input['names'][$i] . " failed<br>\n";
 	}
-	return players_list(array());
+	return players_list(array(), $user);
 }
 

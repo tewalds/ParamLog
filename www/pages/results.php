@@ -1,6 +1,6 @@
 <?
 
-function askresults($input){
+function askresults($input, $user){
 	global $db;
 	
 	$baselines  = $db->query("SELECT baseline, CONCAT(name, ' (', params, ')') FROM baselines ORDER BY name")->fetchfieldset();
@@ -37,10 +37,10 @@ function askresults($input){
 	return true;
 }
 
-function showresults($input){
+function showresults($input, $user){
 	global $db;
 
-	askresults($input);
+	askresults($input, $user);
 
 	if(count($input['baselines']) == 0 && count($input['players']) == 0 && count($input['times']) == 0)
 		return true;
@@ -261,7 +261,7 @@ function showresults($input){
 }
 
 
-function gethosts($input){
+function gethosts($input, $user){
 	global $db;
 
 	$data = $db->query("SELECT host, count(*) as count FROM games WHERE timestamp > UNIX_TIMESTAMP()-3600 GROUP BY host ORDER BY host")->fetchrowset();
@@ -289,7 +289,7 @@ function gethosts($input){
 	return true;
 }
 
-function getrecent($input){
+function getrecent($input, $user){
 	global $db;
 
 	$data = $db->query("SELECT players.name, count(*) as count FROM games, players WHERE games.player = players.player && timestamp > UNIX_TIMESTAMP()-3600 GROUP BY name ORDER BY name")->fetchrowset();

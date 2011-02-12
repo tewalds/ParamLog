@@ -2,6 +2,12 @@
 include("include/mysql.php");
 $db = new MysqlDb($config['db_host'], $config['db_db'], $config['db_user'], $config['db_pass']);
 
+function redirect($loc){
+	header("location: $loc");
+	echo "Redirecting to: <a href='" . htmlentities($loc) . "'>$loc</a>";
+	exit;
+}
+
 function make_select_list( $list, $sel = "" ){
 	$str = "";
 	foreach($list as $k => $v){
