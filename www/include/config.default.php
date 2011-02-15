@@ -5,5 +5,7 @@ $config = array(
 	'db_db'   => 'paramlog',
 	'db_user' => 'paramlog',
 	'db_pass' => 'password',
+
+	'site_name' => "ParamLog",
 );
 

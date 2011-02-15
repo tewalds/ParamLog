@@ -1,13 +1,20 @@
 <?
 
 function login($data, $user){
-	$user = createsession($data['email'], $data['password'], ($data['longsession'] ? 3600 : 86400*30));
+	$user = createsession($data['email'], $data['password'], ($data['longsession'] ? 86400*30 : 86400));
 
-	if($user->userid)
+	if($user->userid){
+		if($data['ref'])
+			redirect($data['ref']);
+		else
 		redirect("/");
+	}
 
-	echo "Login failed, try again";
+	if($data['email'])
+		echo "Login failed, try again";
 
+
+	$ref = $data['ref'];
 	$email = $data['email'];
 	$longsession = $data['longsession'];
 	include("templates/loginform.php");
@@ -20,7 +27,7 @@ function logout($data, $user){
 }
 
 function createuser($data, $user){
-	global $db;
+	global $db, $config;
 
 	$email = $data['email'];
 	$password = $data['password'];
@@ -32,7 +39,7 @@ function createuser($data, $user){
 
 		if(!$res){
 			?>A user with this email already exists, either <a href="/">Login</a> or try <a href="/lostpass">password recovery</a>.<?
-		}elseif(mail($email, "ParamLog account creation", "Welcome to ParamLog. Your key is: $activatekey, or activate here: http://$_SERVER[HTTP_HOST]/activate?email=$email&key=$activatekey")){
+		}elseif(mail($email, "$config[site_name] account creation", "Welcome to $config[site_name]. Your key is: $activatekey, or activate here: http://$_SERVER[HTTP_HOST]/activate?email=$email&key=$activatekey")){
 			?>An email has been sent to your email. Go to the <a href="/activate">Activation page</a> or click the link in your email.<?
 			return true;
 		}else{

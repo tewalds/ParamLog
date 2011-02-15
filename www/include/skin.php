@@ -1,10 +1,12 @@
 <?
 
-function skin($body){
+function skin($user, $body){
+	global $config;
 ?>
 <html>
 	<head>
-		<title>ParamLog</title>
+		<title><?= $config['site_name'] ?></title>
+
 		<link rel="stylesheet" href="/static/basic.css" type="text/css" />
 		<script type="text/javascript" src="/static/basic.js"></script>
 	</head>
