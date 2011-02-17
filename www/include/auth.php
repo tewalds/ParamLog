@@ -33,10 +33,11 @@ function createsession($email, $password, $timeout){
 		return new User();
 
 	$key = randkey();
-	$db->pquery("INSERT INTO sessions SET userid = ?, sessionkey = ?, logintime = ?, activetime = ?, timeout = ?",
-		$row['userid'], $key, time(), time(), $timeout);
+	$time = time();
+	$db->pquery("INSERT INTO sessions SET userid = ?, sessionkey = ?, logintime = ?, activetime = ?, cookietime = ?, timeout = ?",
+		$row['userid'], $key, $time, $time, $time, $timeout);
 
-	setcookie("session", $key, time() + $timeout);
+	setcookie("session", $key, $time + $timeout + 3600);
 
 	return new User($row);
 }
@@ -54,19 +55,25 @@ function auth($key){
 	if($key == "")
 		return new User();
 
-	$row = $db->pquery("SELECT * FROM sessions WHERE sessionkey = ?", $key)->fetchrow();
-	
-	if(!$row || $row['activetime'] + $row['timeout'] < time())
+	$session = $db->pquery("SELECT * FROM sessions WHERE sessionkey = ?", $key)->fetchrow();
+
+	$time = time();
+	if(!$session || $session['activetime'] + $session['timeout'] < $time)
 		return destroysession($key);
 
-	$row = $db->pquery("SELECT * FROM users WHERE userid = ?", $row['userid'])->fetchrow();
+	$user = $db->pquery("SELECT * FROM users WHERE userid = ?", $session['userid'])->fetchrow();
 
-	if(!$row) // || !$row['active'])
+	if(!$user) // || !$user['active'])
 		return destroysession($key);
 
-	$db->pquery("UPDATE sessions SET activetime = ? WHERE sessionkey = ?", time(), $key);
+	if($time - $session['cookietime'] > 1800){
+		setcookie("session", $key, $time + $session['timeout'] + 3600);
+		$session['cookietime'] = $time;
+	}
 
-	return new User($row);
+	$db->pquery("UPDATE sessions SET activetime = ?, cookietime = ? WHERE sessionkey = ?", $time, $session['cookietime'], $key);
+
+	return new User($user);
 }
 
 
