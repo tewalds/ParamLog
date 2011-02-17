@@ -39,6 +39,8 @@ class PHPRouter {
 
 		$url = explode('?', $uri, 2);
 		$url = strtolower($url[0]);
+		if($url[strlen($url)-1] == '/')
+			$url = substr($url, 0, strlen($url)-1);
 
 		if(isset($this->paths[$type][$url])){
 			$node = $this->paths[$type][$url];
