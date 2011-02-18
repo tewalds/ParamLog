@@ -7,7 +7,7 @@ function login($data, $user){
 		if($data['ref'])
 			redirect($data['ref']);
 		else
-		redirect("/");
+			redirect("/");
 	}
 
 	if($data['email'])
