@@ -1,63 +1,199 @@
 
-players
-- userid
+times
 - id
+- userid
+- weight
+- name
+- params
+
+sizes
+- id
+- userid
+- weight
+- name
+- params
+
+players
+- id
+- userid
 - parent
 - type (program, baseline, testgroup, specialization, person)
+- weight
 - name
 - param
-- weight
 - comment
 
+Person - unplayable
+Program - playable
+- baseline - a complete configuration of a program
+- testgroup - a group of tests that test the same feature with different values, 
+  - specialization - different values for that feature
+
+
+timeid, timeparam,
+sizeid, sizeparam,
+p1id, p1cmd, p1config,
+p2id, p2cmd, p2config, p2test
+
+
 round robin of baselines
+	SELECT
+		times.id     as timeid,
+		times.param  as timeparam,
+		sizes.id     as sizeid,
+		sizes.param  as sizeparam,
+		p1base.id    as p1id,
+		p1prog.param as p1cmd,
+		p1base.param as p1config,
+		p2base.id    as p2id,
+		p2prog.param as p2cmd,
+		p2base.param as p2config,
+		''           as p2test
+	FROM
+		players      AS p1prog
+		JOIN players AS p1base
+		JOIN players AS p2prog
+		JOIN players AS p2base
+		JOIN sizes
+		JOIN timelimits
+		LEFT JOIN results ON 
+			results.player1 = p1base.id AND
+			results.player2 = p2base.id AND
+			results.size = sizes.id AND
+			results.timelimit = timelimits.id
+	WHERE
+		p1prog.userid = ? AND
+		p2prog.userid = ? AND
+		sizes.userid = ? AND
+		times.userid = ? AND
+
+		p1prog.type = 'program' AND 
+		p1base.type = 'baseline' AND
+		p1prog.id = p1base.parent AND
+
+		p2prog.type = 'program' AND 
+		p2base.type = 'baseline' AND
+		p2prog.id = p2base.parent AND
+
+		p1base.id < p2base.id AND
+
+		p1prog.weight > 0 AND
+		p1base.weight > 0 AND
+		p2prog.weight > 0 AND
+		p2base.weight > 0 AND
+		sizes.weight > 0 AND
+		timelimits.weight > 0 AND
+		(results.weight IS NULL OR results.weight > 0)
+	ORDER BY
+		(IF(results.numgames IS NULL, 0, results.numgames) / (
+			p1prog.weight *
+			p1base.weight *
+			p2prog.weight *
+			p2base.weight *
+			sizes.weight *
+			timelimits.weight *
+			IF(results.weight IS NULL, 1, results.weight) )) ASC,
+		RAND() 
+	LIMIT 1
+
+
 baselines against test specializations of the same program
+	SELECT
+		times.id     as timeid,
+		times.param  as timeparam,
+		sizes.id     as sizeid,
+		sizes.param  as sizeparam,
+		p1base.id    as p1id,
+		p1prog.param as p1cmd,
+		p1base.param as p1config,
+		p2test.id    as p2id,
+		p2prog.param as p2cmd,
+		p2base.param as p2config,
+		p2test.param as p2test
+	FROM
+		players      AS p1prog
+		JOIN players AS p1base
+		JOIN players AS p2prog
+		JOIN players AS p2group
+		JOIN players AS p2test
+		JOIN sizes
+		JOIN timelimits
+		LEFT JOIN results ON 
+			results.player1 = p1base.id AND
+			results.player2 = p2test.id AND
+			results.size = sizes.id AND
+			results.timelimit = timelimits.id
+	WHERE
+		p1prog.userid = ? AND
+		p2prog.userid = ? AND
+		sizes.userid = ? AND
+		times.userid = ? AND
 
-SELECT
-	baselines.baseline AS b,
-	baselines.params AS bp,
-	players.player AS p,
-	players.params AS pp,
-	sizes.size AS s,
-	sizes.params AS sp,
-	times.time AS t,
-	times.params AS tp
-FROM 
-	baselines
-	JOIN players
-	JOIN sizes
-	JOIN times 
-	LEFT JOIN results USING (baseline, player, size, time)
-WHERE
-	baselines.weight > 0 AND
-	players.weight > 0 AND
-	sizes.weight > 0 AND
-	times.weight > 0 AND
-	(results.weight IS NULL OR results.weight > 0)
-ORDER BY
-	(results.numgames / (baselines.weight * players.weight * sizes.weight * times.weight * IF(results.weight IS NULL, 1, results.weight))) ASC, 
-	RAND() 
-LIMIT 1
+		p1prog.type = 'program' AND 
+		p1base.type = 'baseline' AND
+		p1prog.id = p1base.parent AND
+
+		p2prog.type = 'program' AND
+		p2group.type = 'testgroup' AND
+		p2test.type = 'specialization' AND
+		p2prog.id = p2group.parent AND
+		p2group.id = p2test.parent AND
+
+		p1prog.weight > 0 AND
+		p1base.weight > 0 AND
+		p2prog.weight > 0 AND
+		p2group.weight > 0 AND
+		p2test.weight > 0 AND
+		sizes.weight > 0 AND
+		timelimits.weight > 0 AND
+		(results.weight IS NULL OR results.weight > 0)
+	ORDER BY
+		(IF(results.numgames IS NULL, 0, results.numgames) / (
+			p1prog.weight *
+			p1base.weight *
+			p2prog.weight *
+			p2group.weight *
+			p2test.weight *
+			sizes.weight *
+			timelimits.weight *
+			IF(results.weight IS NULL, 1, results.weight) )) ASC,
+		RAND() 
+	LIMIT 1
 
 
 
+results
+- player1
+- player2 ((player1.type = 'baseline && player2.type = 'test') || (p1ayer1.id < player2.id))
+- size
+- timelimit
+- weight
+- p1wins
+- p2wins
+- draws
+- numgames = (p1wins + p2wins + draws)
 
 
-game
+
+games
 - userid
 - id
 - player1
 - player2
+- size
+- time
+- timestamp
+- playtime
 - nummoves
-- time (when it happened)
-- timelimit
 - outcome1
 - outcome2
 - outcomeref
+- host
 - comments
-
 
 moves
 - id
+- userid
 - gameid
 - move num
 - position
@@ -78,13 +214,14 @@ users
 - activatekey
 - apikey
 - gamename
-- programname
 
 session - valid if (time() > activetime + timeout)
+- id
 - userid
 - key
 - logintime
 - activetime
+- cookietime
 - timeout
 
 
