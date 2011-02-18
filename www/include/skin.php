@@ -17,7 +17,7 @@ function skin($user, $body){
 <a href="/games">Games</a> |
 <a href="/results">Results</a> |
 <a href="/players">Players</a> |
-<a href="/recent">Recent</a> |
+<a href="/results/recent">Recent</a> |
 <a href="/logout">Logout</a>
 <br><br>
 </div>
