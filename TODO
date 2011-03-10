@@ -44,4 +44,7 @@ Setup Fuego, with GnuGo as one of the baselines
 
 graph libraries:
 - http://dygraphs.com/
+- jqplot, write an error bars renderer based on OHLC
 
+css - sass, less
+- https://github.com/nex3/sass
