@@ -3,6 +3,27 @@ include("include/errorlog.php");
 include("include/mysql.php");
 $db = new MysqlDb($config['db_host'], $config['db_db'], $config['db_user'], $config['db_pass']);
 
+$playertypes = array(
+	'person'    => 1, // unplayable, only for game logs
+	'program'   => 2, // base program, incomplete config
+	'baseline'  => 3, // a complete configuration
+	'testgroup' => 4, // a group of tests, but contains no parameters itself
+	'testcase'  => 5, // a test case that can be added to a baseline
+	);
+
+function json($var){
+	return json_encode($var);
+}
+
+function def( & $var, $def){
+	return (isset($var) ? $var : $def);
+}
+
+function undefset( & $var, $def){
+	if(!isset($var))
+		$var = $def;
+}
+
 function redirect($loc){
 	header("location: $loc");
 	echo "Redirecting to: <a href='" . htmlentities($loc) . "'>$loc</a>";

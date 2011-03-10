@@ -1,9 +1,5 @@
 <?
 
-function def( & $var, $def){
-	return (isset($var) ? $var : $def);
-}
-
 class PHPRouter {
 	public $paths;
 	public $prefixes;

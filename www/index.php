@@ -2,9 +2,9 @@
 error_reporting(E_ALL);
 
 include("include/config.php");
-include("include/router.php");
 include("include/lib.php");
 include("include/auth.php");
+include("include/router.php");
 
 $router = new PHPRouter();
 
@@ -41,6 +41,7 @@ $router->add("GET",  "/players",        "players.php", "players_list",   'user',
 $router->add("POST", "/players/route",  "players.php", "players_route",  'user', array("action" => "string", "check" => "array", "weight" => "int"));
 $router->add("POST", "/players/update", "players.php", "players_update", 'user', array("players" => "array", "names" => "array", "weights" => "array", "params" => "array"));
 $router->add("POST", "/players/add",    "players.php", "players_add",    'user', array("names" => "array", "weights" => "array", "params" => "array"));
+$router->add("POST", "/players/savehuman", "players.php", "players_save_human", 'user', array("id" => "int", "name" => "string"));
 
 $router->add("GET", "/api/getwork", "api.php", "getwork", 'api', null);
 $router->add("POST","/api/submit",  "api.php", "submit",  'api', array("baseline" => "int", "player" => "int", "size" => "int", "time" => "int", "outcome" => "int", "log" => "string"));

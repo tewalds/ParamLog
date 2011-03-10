@@ -9,59 +9,162 @@ function players_route($input, $user){
 }
 
 function players_list($input, $user){
-	global $db;
+	global $db, $playertypes;
 	
-	$players = $db->query("SELECT * FROM players ORDER BY name")->fetchrowset();
+	$players = $db->pquery("SELECT * FROM players WHERE userid = ? ORDER BY name", $user->userid)->fetchrowset('id');
+
+	$persons    = array(); // [ids of persons]
+	$programs   = array(); // [ids of programs]
+	$baselines  = array(); // {program => [ids of baselines]}
+	$testgroups = array(); // {program => [ids of testgroups]}
+	$testcases  = array(); // {testgroup => [ids of testcases]}
+
+	foreach($players as $player){
+		switch($player['type']){
+			case $playertypes['person']:    $persons[] = $player['id']; break;
+			case $playertypes['program']:   $programs[] = $player['id']; break;
+			case $playertypes['baseline']:
+				undefset($baselines[$player['parent']], array());
+				$baselines[$player['parent']][] = $player['id'];
+				break;
+			case $playertypes['testgroup']:
+				undefset($testgroups[$player['parent']], array());
+				$testgroups[$player['parent']][] = $player['id'];
+				break;
+			case $playertypes['testcase']:
+				undefset($testcases[$player['parent']], array());
+				$testcases[$player['parent']][] = $player['id'];
+				break;
+			default:
+				trigger_error("Unknown player type... " . print_r($player), E_USER_WARNING);
+		}
+	}
 
 ?>
+<script>
+function init(){
+	$('#humans a').click(function(e){
+		e.preventDefault();
 
-	<form action="/players/route" method="post">
-	<table>
+		if($('#newhuman').length == 0){
+			var n = $("<tr id='newhuman' class='l'><td></td>" +
+				"<td colspan='5'>Name: <input size=30></td>" +
+				"<td><a class='save' href='/players/savehuman'>Save</a> " +
+				"<a class='cancel' href='#'>Cancel</a></td></tr>");
+			var input = n.find('input');
+			n.find('a.save').click(function(e){
+				e.preventDefault();
+				$.post("/players/savehuman", {name : input.val() }, function(data){
+					if(!data.error){
+						$('#newhuman').replaceWith("<tr class='l'><td></td>" +
+							"<td colspan='3'>" + data.name + "</td><td></td><td></td>" +
+							"<td>Edit</td></tr>");
+					}
+				}, 'json');
+			});
+			n.find('a.cancel').click(function(e){
+				e.preventDefault();
+				$('#newhuman').remove();
+			});
+			$('#humans').after(n);
+		}
+	});
+}
+
+$(document).ready(init);
+</script>
+
+
+	<form method="post" action="/players/updateweights">
+	<table width=700>
 	<tr>
 		<th></td>
-		<th>ID</td>
-		<th>Name</td>
-		<th>Weight</td>
+		<th colspan="3">Name</td>
 		<th>Param</td>
+		<th>Weight</td>
+		<th></td>
 	</tr>
-<?	$i = 1;
-	foreach($players as $player){ ?>
-		<tr class="l<?= ($i = 3 - $i) ?>">
-		<td><input type=checkbox name=check[] value="<?= $player['player'] ?>"></td>
-		<td><?= $player['player'] ?></td>
-		<td><?= $player['name']   ?></td>
-		<td><?= $player['weight'] ?></td>
-		<td><?= $player['params'] ?></td>
+	<tr class="l2" id="humans"><td></td>
+		<td colspan="5"><b>Humans:</b></td>
+		<td><a href="/players/newhuman">New Human</a></td>
+	</tr>
+	<? foreach($persons as $pid){
+		$player = $players[$pid]; ?>
+		<tr class="l">
+		<td></td>
+		<td colspan="3"><?= $player['name'] ?></td>
+		<td></td>
+		<td></td>
+		<td>Edit</td>
 		</tr>
-<?	} ?>
-	<tr class='f'>
-		<td colspan='5'>
-			<input type=submit name=action value='Edit'>
-			Weight: <input type=text name=weight value=0 size=3>
-			<input type=submit name=action value='Set Weight'>
+	<?	} ?>
+	<tr class="l2" id="programs"><td></td>
+		<td colspan="5"><b>Programs:</b></td>
+		<td>New Program</td>
+	</tr>
+	<? foreach($programs as $pid){
+		$player = $players[$pid]; ?>
+		<tr class="l">
+		<td><input type=checkbox name=check[] value="<?= $player['id'] ?>"></td>
+		<td colspan="3"><?= $player['name'] ?></td>
+		<td><?= $player['params'] ?></td>
+		<td><?= $player['weight'] ?></td>
+		<td>Edit</td>
+		</tr>
+		<tr class="l2" id="baseline<?= $pid ?>"><td></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td colspan="4"><b>Baselines:</b></td>
+			<td>New Baseline</td>
+		</tr>
+		<? foreach($baselines[$pid] as $bid){
+			$player = $players[$bid]; ?>
+			<tr class="l">
+			<td><input type=checkbox name=check[] value="<?= $player['id'] ?>"></td>
+			<td></td>
+			<td colspan="2"><?= $player['name'] ?></td>
+			<td><?= $player['params'] ?></td>
+			<td><?= $player['weight'] ?></td>
+			<td>Edit</td>
+			</tr>
+		<? } ?>
+		<tr class="l2" id="testgroups<?= $pid ?>"><td></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td colspan="4"><b>Test Groups:</b></td>
+			<td>New Test Group</td>
+		</tr>
+		<? foreach($testgroups[$pid] as $gid){
+			$player = $players[$gid]; ?>
+			<tr class="l">
+			<td><input type=checkbox name=check[] value="<?= $player['id'] ?>"></td>
+			<td></td>
+			<td colspan="2"><?= $player['name'] ?></td>
+			<td><?= $player['params'] ?></td>
+			<td><?= $player['weight'] ?></td>
+			<td>Edit, New Value</td>
+			</tr>
+			<? foreach($testcases[$gid] as $tid){
+				$player = $players[$tid]; ?>
+				<tr class="l">
+				<td><input type=checkbox name=check[] value="<?= $player['id'] ?>"></td>
+				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+				<td><?= $player['name'] ?></td>
+				<td><?= $player['params'] ?></td>
+				<td><?= $player['weight'] ?></td>
+				<td>Edit</td>
+				</tr>
+			<? } ?>
+		<? } ?>
+	<? } ?>
+	<tr class="f">
+		<td colspan="7">
+			Weight: <input type="text" name="weight" value="0" size="3">
+			<input type="submit" name="action" value="Set Weight">
 		</td>
 	</tr>
 	</table>
 	</form>
 
-<br><br>
-
-	<form action="/players/add" method="post">
-	<table id="addplayers">
-		<tr><th colspan="3">Add Players</th></tr>
-		<tr><th>Name</th><th>Weight</th><th>Params</th></tr>
-		<tr>
-			<td><input type="text" name="names[]"   value="" size=40 /></td>
-			<td><input type="text" name="weights[]" value="" size=5  /></td>
-			<td><input type="text" name="params[]"  value="" size=30 /></td>
-		</tr><tr id="before" class='f'>
-			<td colspan="3">
-				<input type="submit" value="Add Players" /> <a class="body" href="javascript: copyInputRow('addplayers','before'); void(0);">Add a row</a>. Blank rows will be ignored.
-			</td>
-		</tr>
-	</table>
-	</form>
-	
 <?
 	return true;
 }
@@ -70,7 +173,7 @@ function players_list($input, $user){
 function players_set_weight($input, $user){
 	global $db;
 
-	$db->pquery("UPDATE players SET weight = ? WHERE player IN (?)", $input['weight'], $input['check']);
+	$db->pquery("UPDATE players SET weight = ? WHERE userid = ? && id IN (?)", $input['weight'], $user->userid, $input['check']);
 	
 	echo "Players updated<br>";
 	
@@ -109,6 +212,26 @@ function players_edit($input, $user){
 	</form>
 <?
 	return true;
+}
+
+function players_save_human($input, $user){
+	global $db, $playertypes;
+
+	if($input['name']){
+		if($input['id']){
+			$res = $db->pquery("UPDATE players SET name = ? WHERE userid = ? && id = ? && type = ?", $input['name'], $user->userid, $input['id'], $playertypes['person']);
+			if($res->affectedrows() == 0)
+				echo json(array("error" => "no row to update"));
+			else
+				echo json(array("id" => $input['id'], "name" => htmlentities($input['name'])));
+		}else{
+			$res = $db->pquery("INSERT INTO players SET userid = ?, type = ?, name = ?", $user->userid, $playertypes['person'], $input['name']);
+			echo json(array("id" => $res->insertid(), "name" => htmlentities($input['name'])));
+		}
+	}else{
+		echo json(array("error" => "empty name"));
+	}
+	return false;
 }
 
 function players_update($input, $user){
