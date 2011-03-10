@@ -42,36 +42,69 @@ function players_list($input, $user){
 
 ?>
 <script>
-function init(){
-	$('#humans a').click(function(e){
+$('a.newhuman').live('click', function(e){
+	e.preventDefault();
+
+	if($('#newhuman').length == 0){
+		var n = $('<tr id="newhuman" class="l"><td></td>' +
+			'<td colspan="3"><input></td><td></td><td></td>' +
+			'<td><a class="save" href="#">Save</a> ' +
+			'<a class="cancel" href="#">Cancel</a></td></tr>');
+		var input = n.find('input');
+		n.find('a.save').click(function(e){
+			e.preventDefault();
+			$.post("/players/savehuman", {name : input.val() }, function(data){
+				if(data.error){
+					alert(data.error);
+				}else{
+					$('#newhuman').replaceWith('<tr class="l"><td><input type="hidden" value="' + data.id + '"></td>' +
+						'<td colspan="3">' + data.name + '</td><td></td><td></td>' +
+						'<td><a class="edithuman" href="#">Edit</a></td></tr>');
+				}
+			}, 'json');
+		});
+		n.find('a.cancel').click(function(e){
+			e.preventDefault();
+			$('#newhuman').remove();
+		});
+		$('#humans').after(n);
+	}
+});
+
+$('a.edithuman').live('click', function(e){
+	e.preventDefault();
+	var tr = $(this).parent().parent();
+	var tds = tr.children();
+
+	var td = $(tds[1]);
+	var value = td.html();
+	var input = $('<input name="name">').val(value);
+	td.html(input);
+
+	td = $(tds[4])
+	var links = $('<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>');
+	links.filter("a.save").click(function(e){
 		e.preventDefault();
 
-		if($('#newhuman').length == 0){
-			var n = $("<tr id='newhuman' class='l'><td></td>" +
-				"<td colspan='5'>Name: <input size=30></td>" +
-				"<td><a class='save' href='/players/savehuman'>Save</a> " +
-				"<a class='cancel' href='#'>Cancel</a></td></tr>");
-			var input = n.find('input');
-			n.find('a.save').click(function(e){
-				e.preventDefault();
-				$.post("/players/savehuman", {name : input.val() }, function(data){
-					if(!data.error){
-						$('#newhuman').replaceWith("<tr class='l'><td></td>" +
-							"<td colspan='3'>" + data.name + "</td><td></td><td></td>" +
-							"<td>Edit</td></tr>");
-					}
-				}, 'json');
-			});
-			n.find('a.cancel').click(function(e){
-				e.preventDefault();
-				$('#newhuman').remove();
-			});
-			$('#humans').after(n);
-		}
+		var input = tr.find('input');
+		$.post("/players/savehuman", input.serialize(), function(data){
+			if(data.error){
+				alert(data.error);
+			}else{
+				$(tds[1]).html(data.name)
+				$(tds[4]).html('<a class="edithuman" href="#">Edit</a>');
+			}
+		}, 'json');
 	});
-}
+	links.filter("a.cancel").click(function(e){
+		e.preventDefault();
 
-$(document).ready(init);
+		$(tds[1]).html(value)
+		$(tds[4]).html('<a class="edithuman" href="#">Edit</a>');
+	});
+	td.html(links);
+});
+
 </script>
 
 
@@ -86,16 +119,16 @@ $(document).ready(init);
 	</tr>
 	<tr class="l2" id="humans"><td></td>
 		<td colspan="5"><b>Humans:</b></td>
-		<td><a href="/players/newhuman">New Human</a></td>
+		<td><a class="newhuman" href="#">New Human</a></td>
 	</tr>
 	<? foreach($persons as $pid){
 		$player = $players[$pid]; ?>
 		<tr class="l">
-		<td></td>
+		<td><input type="hidden" name="id" value="<?= $pid ?>"></td>
 		<td colspan="3"><?= $player['name'] ?></td>
 		<td></td>
 		<td></td>
-		<td>Edit</td>
+		<td><a class="edithuman" href="#">Edit</a></td>
 		</tr>
 	<?	} ?>
 	<tr class="l2" id="programs"><td></td>
