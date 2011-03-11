@@ -42,33 +42,60 @@ function players_list($input, $user){
 
 ?>
 <script>
+
+jQuery.fn.save = function() {
+	return this.each(function() {
+		$.data(this, 'savedvalue', $(this).html());
+	});
+};
+jQuery.fn.revert = function() {
+	return this.each(function() {
+		$(this).html($.data(this, 'savedvalue'));
+	});
+};
+jQuery.fn.editbox = function(options) {
+	return this.each(function() {
+		var value = $(this).html();
+		var input = $('<input>').val(value);
+		$.each(options, function(k,v){
+			input.attr(k, v);
+		});
+		$(this).html(input);
+	});
+};
+jQuery.fn.input_obj = function(ret) {
+	ret = ret || { };
+	this.find('input').each(function() {
+		ret[this.name] = this.value;
+	});
+	return ret;
+};
+
+
 $('a.newhuman').live('click', function(e){
 	e.preventDefault();
 
-	if($('#newhuman').length == 0){
-		var n = $('<tr id="newhuman" class="l"><td></td>' +
-			'<td colspan="3"><input></td><td></td><td></td>' +
-			'<td><a class="save" href="#">Save</a> ' +
-			'<a class="cancel" href="#">Cancel</a></td></tr>');
-		var input = n.find('input');
-		n.find('a.save').click(function(e){
-			e.preventDefault();
-			$.post("/players/savehuman", {name : input.val() }, function(data){
-				if(data.error){
-					alert(data.error);
-				}else{
-					$('#newhuman').replaceWith('<tr class="l"><td><input type="hidden" value="' + data.id + '"></td>' +
-						'<td colspan="3">' + data.name + '</td><td></td><td></td>' +
-						'<td><a class="edithuman" href="#">Edit</a></td></tr>');
-				}
-			}, 'json');
-		});
-		n.find('a.cancel').click(function(e){
-			e.preventDefault();
-			$('#newhuman').remove();
-		});
-		$('#humans').after(n);
-	}
+	var tr = $('<tr class="l"><td></td>' +
+		'<td><input name="name"></td><td></td><td></td>' +
+		'<td><a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a></td></tr>');
+	tr.find('a.save').click(function(e){
+		e.preventDefault();
+		var input = tr.input_obj({type: <?= $playertypes['person'] ?> });
+		$.post("/players/save", input, function(data){
+			if(data.error){
+				alert(data.error);
+			}else{
+				tr.replaceWith('<tr class="l"><td><input type="hidden" name="id" value="' + data.id + '"></td>' +
+					'<td>' + data.name + '</td><td></td><td></td>' +
+					'<td><a class="edithuman" href="#">Edit</a></td></tr>');
+			}
+		}, 'json');
+	});
+	tr.find('a.cancel').click(function(e){
+		e.preventDefault();
+		tr.remove();
+	});
+	$('#humans').after(tr);
 });
 
 $('a.edithuman').live('click', function(e){
@@ -76,101 +103,139 @@ $('a.edithuman').live('click', function(e){
 	var tr = $(this).parent().parent();
 	var tds = tr.children();
 
-	var td = $(tds[1]);
-	var value = td.html();
-	var input = $('<input name="name">').val(value);
-	td.html(input);
+	tds.save();
 
-	td = $(tds[4])
+	$(tds[1]).editbox({name: "name"});
+
 	var links = $('<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>');
 	links.filter("a.save").click(function(e){
 		e.preventDefault();
-
-		var input = tr.find('input');
-		$.post("/players/savehuman", input.serialize(), function(data){
+		var input = tr.input_obj({type: <?= $playertypes['person'] ?> });
+		$.post("/players/save", input, function(data){
 			if(data.error){
 				alert(data.error);
 			}else{
 				$(tds[1]).html(data.name)
-				$(tds[4]).html('<a class="edithuman" href="#">Edit</a>');
+				$(tds[4]).revert();
 			}
 		}, 'json');
 	});
 	links.filter("a.cancel").click(function(e){
 		e.preventDefault();
-
-		$(tds[1]).html(value)
-		$(tds[4]).html('<a class="edithuman" href="#">Edit</a>');
+		tds.revert();
 	});
-	td.html(links);
+	$(tds[4]).html(links);
 });
+
+
+$('a.newprogram').live('click', function(e){
+	e.preventDefault();
+
+	var tr = $('<tr class="l"><td></td>' +
+		'<td><input name="name"></td>' +
+		'<td><input name="params"></td>' +
+		'<td><input name="weight" size="3"></td>' +
+		'<td><a class="save" href="#">Save</a> ' +
+		'<a class="cancel" href="#">Cancel</a></td></tr>');
+	tr.find('a.save').click(function(e){
+		e.preventDefault();
+		var input = tr.input_obj({type: <?= $playertypes['program'] ?> });
+		$.post("/players/save", input, function(data){
+			if(data.error){
+				alert(data.error);
+			}else{
+				tr.replaceWith('<tr class="l"><td><input type="hidden" value="' + data.id + '"></td>' +
+					'<td>' + data.name + '</td><td></td><td></td>' +
+					'<td><a class="editprogram" href="#">Edit</a></td></tr>' +
+					'<tr class="l2"><td></td><td class="spacer" colspan="3"><b>Baselines:</b></td>' +
+					'<td><a class="newbaseline" href="#">New Baseline</a></td></tr>' +
+					'<tr class="l2"><td></td><td class="spacer" colspan="3"><b>Test Groups:</b></td>' +
+					'<td><a class="newtestgroup" href="#">New Test Group</a></td></tr>'
+					);
+			}
+		}, 'json');
+	});
+	tr.find('a.cancel').click(function(e){
+		e.preventDefault();
+		tr.remove();
+	});
+	$('#programs').after(tr);
+});
+
 
 </script>
 
 
-	<form method="post" action="/players/updateweights">
 	<table width=700>
 	<tr>
 		<th></td>
-		<th colspan="3">Name</td>
+		<th>Name</td>
 		<th>Param</td>
 		<th>Weight</td>
 		<th></td>
 	</tr>
 	<tr class="l2" id="humans"><td></td>
-		<td colspan="5"><b>Humans:</b></td>
+		<td colspan="3"><b>Humans:</b></td>
 		<td><a class="newhuman" href="#">New Human</a></td>
 	</tr>
 	<? foreach($persons as $pid){
 		$player = $players[$pid]; ?>
 		<tr class="l">
 		<td><input type="hidden" name="id" value="<?= $pid ?>"></td>
-		<td colspan="3"><?= $player['name'] ?></td>
+		<td><?= $player['name'] ?></td>
 		<td></td>
 		<td></td>
 		<td><a class="edithuman" href="#">Edit</a></td>
 		</tr>
 	<?	} ?>
 	<tr class="l2" id="programs"><td></td>
-		<td colspan="5"><b>Programs:</b></td>
-		<td>New Program</td>
+		<td colspan="3"><b>Programs:</b></td>
+		<td><a class="newprogram" href="#">New Program</a></td>
 	</tr>
 	<? foreach($programs as $pid){
 		$player = $players[$pid]; ?>
 		<tr class="l">
-		<td><input type=checkbox name=check[] value="<?= $player['id'] ?>"></td>
-		<td colspan="3"><?= $player['name'] ?></td>
+		<td>
+			<input type="hidden" name="id" value="<?= $player['id'] ?>">
+			<input type="hidden" name="type" value="<?= $player['type'] ?>">
+			<input type="hidden" name="parent" value="<?= $player['parent'] ?>">
+		</td>
+		<td><?= $player['name'] ?></td>
 		<td><?= $player['params'] ?></td>
 		<td><?= $player['weight'] ?></td>
 		<td>Edit</td>
 		</tr>
 		<tr class="l2" id="baseline<?= $pid ?>"><td></td>
-			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-			<td colspan="4"><b>Baselines:</b></td>
-			<td>New Baseline</td>
+			<td class="spacer" colspan="3"><b>Baselines:</b></td>
+			<td><a class="newbaseline" href="#">New Baseline</a></td>
 		</tr>
 		<? foreach($baselines[$pid] as $bid){
 			$player = $players[$bid]; ?>
 			<tr class="l">
-			<td><input type=checkbox name=check[] value="<?= $player['id'] ?>"></td>
-			<td></td>
-			<td colspan="2"><?= $player['name'] ?></td>
+			<td>
+				<input type="hidden" name="id" value="<?= $player['id'] ?>">
+				<input type="hidden" name="type" value="<?= $player['type'] ?>">
+				<input type="hidden" name="parent" value="<?= $player['parent'] ?>">
+			</td>
+			<td class="spacer"><?= $player['name'] ?></td>
 			<td><?= $player['params'] ?></td>
 			<td><?= $player['weight'] ?></td>
 			<td>Edit</td>
 			</tr>
 		<? } ?>
 		<tr class="l2" id="testgroups<?= $pid ?>"><td></td>
-			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-			<td colspan="4"><b>Test Groups:</b></td>
-			<td>New Test Group</td>
+			<td class="spacer" colspan="3"><b>Test Groups:</b></td>
+			<td><a class="newtestgroup" href="#">New Test Group</a></td>
 		</tr>
 		<? foreach($testgroups[$pid] as $gid){
 			$player = $players[$gid]; ?>
 			<tr class="l">
-			<td><input type=checkbox name=check[] value="<?= $player['id'] ?>"></td>
-			<td></td>
-			<td colspan="2"><?= $player['name'] ?></td>
+			<td>
+				<input type="hidden" name="id" value="<?= $player['id'] ?>">
+				<input type="hidden" name="type" value="<?= $player['type'] ?>">
+				<input type="hidden" name="parent" value="<?= $player['parent'] ?>">
+			</td>
+			<td class="spacer"><?= $player['name'] ?></td>
 			<td><?= $player['params'] ?></td>
 			<td><?= $player['weight'] ?></td>
 			<td>Edit, New Value</td>
@@ -178,10 +243,12 @@ $('a.edithuman').live('click', function(e){
 			<? foreach($testcases[$gid] as $tid){
 				$player = $players[$tid]; ?>
 				<tr class="l">
-				<td><input type=checkbox name=check[] value="<?= $player['id'] ?>"></td>
-				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-				<td><?= $player['name'] ?></td>
+				<td>
+					<input type="hidden" name="id" value="<?= $player['id'] ?>">
+					<input type="hidden" name="type" value="<?= $player['type'] ?>">
+					<input type="hidden" name="parent" value="<?= $player['parent'] ?>">
+				</td>
+				<td class="spacer2"><?= $player['name'] ?></td>
 				<td><?= $player['params'] ?></td>
 				<td><?= $player['weight'] ?></td>
 				<td>Edit</td>
@@ -189,109 +256,26 @@ $('a.edithuman').live('click', function(e){
 			<? } ?>
 		<? } ?>
 	<? } ?>
-	<tr class="f">
-		<td colspan="7">
-			Weight: <input type="text" name="weight" value="0" size="3">
-			<input type="submit" name="action" value="Set Weight">
-		</td>
-	</tr>
 	</table>
-	</form>
 
 <?
 	return true;
 }
 
-
-function players_set_weight($input, $user){
-	global $db;
-
-	$db->pquery("UPDATE players SET weight = ? WHERE userid = ? && id IN (?)", $input['weight'], $user->userid, $input['check']);
-	
-	echo "Players updated<br>";
-	
-	return players_list($input, $user);
-}
-
-function players_edit($input, $user){
-	global $db;
-
-	$players = $db->pquery("SELECT * FROM players WHERE player IN (?) ORDER BY name", $input['check'])->fetchrowset();
-
-?>
-	<form action="/players/update" method="post">
-	<table>
-	<tr><th colspan=4>Edit players</th></tr>
-	<tr>
-		<th>ID</th>
-		<th>Name</th>
-		<th>Weight</th>
-		<th>Param</th>
-	</tr>
-<?
-	$i = 1;
-	foreach($players as $player){
-?>		<tr class="l<?= ($i = 3 - $i) ?>">
-		<td><input type=hidden name="players[]" value="<?= $player['player'] ?>"/><?= $player['player'] ?></td>
-		<td><input type="text" name="names[]"   value="<?= htmlentities($player['name'])   ?>" size=40 /></td>
-		<td><input type="text" name="weights[]" value="<?= htmlentities($player['weight']) ?>" size=5  /></td>
-		<td><input type="text" name="params[]"  value="<?= htmlentities($player['params']) ?>" size=30 /></td>
-		</tr>
-<?	} ?>
-	<tr class='f'><td colspan=4>
-		<input type=submit name=action value=Update>
-	</td></tr>
-	</table>
-	</form>
-<?
-	return true;
-}
-
-function players_save_human($input, $user){
+function players_save($input, $user){
 	global $db, $playertypes;
 
 	if($input['name']){
 		if($input['id']){
-			$res = $db->pquery("UPDATE players SET name = ? WHERE userid = ? && id = ? && type = ?", $input['name'], $user->userid, $input['id'], $playertypes['person']);
-			if($res->affectedrows() == 0)
-				echo json(array("error" => "no row to update"));
-			else
-				echo json(array("id" => $input['id'], "name" => htmlentities($input['name'])));
+			$res = $db->pquery("UPDATE players SET name = ?, params = ?, weight = ? WHERE userid = ? && id = ?", $input['name'], $input['params'], $input['weight'], $user->userid, $input['id']);
 		}else{
-			$res = $db->pquery("INSERT INTO players SET userid = ?, type = ?, name = ?", $user->userid, $playertypes['person'], $input['name']);
-			echo json(array("id" => $res->insertid(), "name" => htmlentities($input['name'])));
+			$res = $db->pquery("INSERT INTO players SET userid = ?, type = ?, name = ?, params = ?, weight = ?", $user->userid, $input['type'], $input['name'], $input['params'], $input['weight']);
+			$input['id'] = $res->insertid();
 		}
+		echo json(h($input));
 	}else{
 		echo json(array("error" => "empty name"));
 	}
 	return false;
-}
-
-function players_update($input, $user){
-	global $db;
-
-	for($i = 0; $i < count($input['players']); $i++)
-		$db->pquery("UPDATE players SET name = ?, weight = ?, params = ? WHERE player = ?", 
-			$input['names'][$i], $input['weights'][$i], $input['params'][$i], $input['players'][$i]);
-
-	echo "Players Updated<br>\n";
-	
-	return players_list(array(), $user);
-}
-
-function players_add($input, $user){
-	global $db;
-
-	for($i = 0; $i < count($input['names']); $i++){
-		if(empty($input['names'][$i]) || !isset($input['weights'][$i]) || empty($input['params'][$i]))
-			continue;
-	
-		if($db->pquery("INSERT INTO players SET name = ?, weight = ?, params = ?",
-			$input['names'][$i], $input['weights'][$i], $input['params'][$i])->affectedrows() == 1)
-			echo $input['names'][$i] . " input successfully<br>\n";
-		else
-			echo $input['names'][$i] . " failed<br>\n";
-	}
-	return players_list(array(), $user);
 }
 

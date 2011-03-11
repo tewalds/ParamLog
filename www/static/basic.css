@@ -2,4 +2,6 @@
 tr.h, tr.f, th, td.h, td.f { background-color: #DDDDDD; }
 tr.l1, td.l1, tr.l, td.l   { background-color: #F7F7F7; }
 tr.l2, td.l2   { background-color: #EFEFEF; }
+td.spacer { padding-left: 25px }
+td.spacer2 { padding-left: 50px }
 

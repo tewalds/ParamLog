@@ -38,10 +38,7 @@ $router->add("GET", "/results/hosts",  "results.php", "gethosts",    'user', nul
 $router->add("GET", "/results/recent", "results.php", "getrecent",   'user', null);
 
 $router->add("GET",  "/players",        "players.php", "players_list",   'user', null);
-$router->add("POST", "/players/route",  "players.php", "players_route",  'user', array("action" => "string", "check" => "array", "weight" => "int"));
-$router->add("POST", "/players/update", "players.php", "players_update", 'user', array("players" => "array", "names" => "array", "weights" => "array", "params" => "array"));
-$router->add("POST", "/players/add",    "players.php", "players_add",    'user', array("names" => "array", "weights" => "array", "params" => "array"));
-$router->add("POST", "/players/savehuman", "players.php", "players_save_human", 'user', array("id" => "int", "name" => "string"));
+$router->add("POST", "/players/save",   "players.php", "players_save",   'user', array("id" => "int", "type" => "int", "parent" => "int", "name" => "string", "params" => "string", "weight" => "int"));
 
 $router->add("GET", "/api/getwork", "api.php", "getwork", 'api', null);
 $router->add("POST","/api/submit",  "api.php", "submit",  'api', array("baseline" => "int", "player" => "int", "size" => "int", "time" => "int", "outcome" => "int", "log" => "string"));
