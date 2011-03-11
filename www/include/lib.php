@@ -15,6 +15,21 @@ function json($var){
 	return json_encode($var);
 }
 
+function h($var){
+	switch(gettype($var)){
+		case 'string': return htmlentities($var);
+		case 'array' :
+			$r = array();
+			foreach($var as $k => $v)
+				$r[h($k)] = h($v);
+			return $r;
+		case 'object':
+			trigger_error("Don't know how to htmlentities an object...", E_USER_ERROR);
+		default:
+			return $var;
+	}
+}
+
 function def( & $var, $def){
 	return (isset($var) ? $var : $def);
 }
