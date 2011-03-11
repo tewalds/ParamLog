@@ -1,13 +1,5 @@
 <?
 
-function players_route($input, $user){
-	switch($input['action']){
-		case 'Set Weight': return players_set_weight($input);
-		case 'Edit'      : return players_edit($input);
-		default:           return players_list($input);
-	}
-}
-
 function players_list($input, $user){
 	global $db, $playertypes;
 	
