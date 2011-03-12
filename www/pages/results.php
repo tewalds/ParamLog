@@ -1,27 +1,99 @@
 <?
 
-function askresults($input, $user){
+function showresults($input, $user){
 	global $db;
-	
-	$baselines  = $db->query("SELECT baseline, CONCAT(name, ' (', params, ')') FROM baselines ORDER BY name")->fetchfieldset();
-	$timelimits = $db->query("SELECT time,     CONCAT(name, ' (', params, ')') FROM times     ORDER BY name")->fetchfieldset();
-	$players    = $db->query("SELECT player,   CONCAT(name, ' (', params, ')') FROM players   ORDER BY name")->fetchfieldset();
-	$numgames   = $db->query("SELECT count(*) FROM games")->fetchfield();
+
+	$players = $db->pquery("SELECT * FROM players WHERE userid = ? ORDER BY name", $user->userid)->fetchrowset('id');
+
+	$persons    = array(); // [ids of persons]
+	$programs   = array(); // [ids of programs]
+	$baselines  = array(); // {program => [ids of baselines]}
+	$testgroups = array(); // {program => [ids of testgroups]}
+	$testcases  = array(); // {testgroup => [ids of testcases]}
+
+	foreach($players as $player){
+		switch($player['type']){
+			case P_PERSON:    $persons[] = $player['id']; break;
+			case P_PROGRAM:   $programs[] = $player['id']; break;
+			case P_BASELINE:
+				undefset($baselines[$player['parent']], array());
+				$baselines[$player['parent']][] = $player['id'];
+				break;
+			case P_TESTGROUP:
+				undefset($testgroups[$player['parent']], array());
+				$testgroups[$player['parent']][] = $player['id'];
+				break;
+			case P_TESTCASE:
+				undefset($testcases[$player['parent']], array());
+				$testcases[$player['parent']][] = $player['id'];
+				break;
+			default:
+				trigger_error("Unknown player type... " . print_r($player), E_USER_WARNING);
+		}
+	}
+
+	$times = $db->pquery("SELECT * FROM times WHERE userid = ? ORDER BY name", $user->userid)->fetchrowset();
+	$sizes = $db->pquery("SELECT * FROM sizes WHERE userid = ? ORDER BY name", $user->userid)->fetchrowset();
+	$numgames = $db->pquery("SELECT count(*) FROM games WHERE userid = ?", $user->userid)->fetchfield();
 
 ?>
 	<table><form action=/results method=GET>
 		<tr>
-			<td valign=top>
+			<td valign="top" rowspan="3">
 				Players:<br>
-				<select name=players[] multiple=multiple size=20 style='width: 375px'><?= make_select_list_multiple_key($players, $input['players']) ?></select>
+				<select name=players[] multiple=multiple size=20 style='width: 375px'>
+				<? foreach($programs as $pid){
+					$player = $players[$pid]; ?>
+					<option class="program" value="<?= $pid ?>" disabled='disabled'<?= selected($pid, $input['players']) ?>><?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
+					<? foreach($baselines[$pid] as $bid){
+						$player = $players[$bid]; ?>
+						<option class="baseline" value="<?= $bid ?>"<?= selected($bid, $input['players']) ?>>&nbsp;&nbsp;&nbsp;<?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
+					<? }
+					foreach($testgroups[$pid] as $gid){
+						$player = $players[$gid]; ?>
+						<option class="testgroup" value="<?= $gid ?>"<?= selected($gid, $input['players']) ?>>&nbsp;&nbsp;&nbsp;<?= h($player['name']) ?></option>
+						<? foreach($testcases[$gid] as $tid){
+							$player = $players[$tid]; ?>
+							<option class="testcase" value="<?= $tid ?>"<?= selected($tid, $input['players']) ?>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
+						<? }
+					}
+				} ?>
+				</select>
 			</td>
-			<td valign=top>
+			<td valign="top" colspan="2">
 				Baselines:<br>
-				<select name=baselines[] multiple=multiple style='width: 500px'><?= make_select_list_multiple_key($baselines, $input['baselines']) ?></select>
-				<br><br>
+				<select name="baselines[]" multiple="multiple" style='width: 500px'>
+				<? foreach($programs as $pid){
+					$player = $players[$pid]; ?>
+					<option class="program" value="<?= $pid ?>" disabled='disabled'<?= selected($pid, $input['baselines']) ?>><?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
+					<? foreach($baselines[$pid] as $bid){
+						$player = $players[$bid]; ?>
+						<option class="baseline" value="<?= $bid ?>"<?= selected($bid, $input['baselines']) ?>>&nbsp;&nbsp;&nbsp;<?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
+					<? }
+				} ?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top">
 				Time Limit:<br>
-				<select name=times[] multiple=multiple style='width: 500px'><?= make_select_list_multiple_key($timelimits, $input['times']) ?></select>
-				<br><br>
+				<select name="times[]" multiple="multiple" style='width: 245px'>
+				<? foreach($times as $time){ ?>
+					<option value="<?= $time['id'] ?>" <?= selected($time['id'], $input['times']) ?>><?= h($time['name']) ?> (<?= h($time['move']) . " " . h($time['game']) . " " . h($time['sims']) ?>)</option>
+				<? } ?>
+				</select>
+			</td>
+			<td valign="top">
+				Board Sizes:<br>
+				<select name="sizes[]" multiple="multiple" style='width: 245px'>
+				<? foreach($sizes as $time){ ?>
+					<option value="<?= $time['id'] ?>" <?= selected($time['id'], $input['sizes']) ?>><?= h($time['name']) ?> (<?= h($time['size']) ?>)</option>
+				<? } ?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top" colspan="2">
 				<?= makeCheckBox("scale", "Scale Graph", $input['scale']) ?><br>
 				<?= makeCheckBox("errorbars", "Show Errorbars", $input['errorbars']) ?><br>
 				<?= makeCheckBox("simpledata", "Show Simple Data", $input['simpledata']) ?><br>
@@ -34,13 +106,6 @@ function askresults($input, $user){
 
 
 <?
-	return true;
-}
-
-function showresults($input, $user){
-	global $db;
-
-	askresults($input, $user);
 
 	if(count($input['baselines']) == 0 && count($input['players']) == 0 && count($input['times']) == 0)
 		return true;
@@ -264,7 +329,7 @@ function showresults($input, $user){
 function gethosts($input, $user){
 	global $db;
 
-	$data = $db->query("SELECT host, count(*) as count FROM games WHERE timestamp > UNIX_TIMESTAMP()-3600 GROUP BY host ORDER BY host")->fetchrowset();
+	$data = $db->pquery("SELECT host, count(*) as count FROM games WHERE userid = ? && timestamp > UNIX_TIMESTAMP()-3600 GROUP BY host ORDER BY host", $user->userid)->fetchrowset();
 
 	echo "<table>";
 	echo "<tr>";
@@ -292,7 +357,7 @@ function gethosts($input, $user){
 function getrecent($input, $user){
 	global $db;
 
-	$data = $db->query("SELECT players.name, count(*) as count FROM games, players WHERE games.player = players.player && timestamp > UNIX_TIMESTAMP()-3600 GROUP BY name ORDER BY name")->fetchrowset();
+	$data = $db->pquery("SELECT players.name, count(*) as count FROM games, players WHERE games.userid = players.userid && players.userid = ? && games.player = players.player && timestamp > UNIX_TIMESTAMP()-3600 GROUP BY name ORDER BY name", $user->userid)->fetchrowset();
 	echo "<table>";
 	echo "<tr>";
 	echo "<th>Player</th>";

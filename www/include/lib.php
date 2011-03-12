@@ -3,13 +3,13 @@ include("include/errorlog.php");
 include("include/mysql.php");
 $db = new MysqlDb($config['db_host'], $config['db_db'], $config['db_user'], $config['db_pass']);
 
-$playertypes = array(
-	'person'    => 1, // unplayable, only for game logs
-	'program'   => 2, // base program, incomplete config
-	'baseline'  => 3, // a complete configuration
-	'testgroup' => 4, // a group of tests, but contains no parameters itself
-	'testcase'  => 5, // a test case that can be added to a baseline
-	);
+//types of players
+define('P_PERSON',    1); // unplayable, only for game logs
+define('P_PROGRAM',   2); // base program, incomplete config
+define('P_BASELINE',  3); // a complete configuration
+define('P_TESTGROUP', 4); // a group of tests, but contains no parameters itself
+define('P_TESTCASE',  5); // a test case that can be added to a baseline
+
 
 function json($var){
 	return json_encode($var);
@@ -43,6 +43,10 @@ function redirect($loc){
 	header("location: $loc");
 	echo "Redirecting to: <a href='" . htmlentities($loc) . "'>$loc</a>";
 	exit;
+}
+
+function selected($id, $list){
+	return (in_array($id, $list) ? " selected='selected'" : "");
 }
 
 function make_select_list( $list, $sel = "" ){

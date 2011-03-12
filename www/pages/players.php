@@ -1,8 +1,8 @@
 <?
 
 function players_list($input, $user){
-	global $db, $playertypes;
-	
+	global $db;
+
 	$players = $db->pquery("SELECT * FROM players WHERE userid = ? ORDER BY name", $user->userid)->fetchrowset('id');
 
 	$persons    = array(); // [ids of persons]
@@ -13,17 +13,17 @@ function players_list($input, $user){
 
 	foreach($players as $player){
 		switch($player['type']){
-			case $playertypes['person']:    $persons[] = $player['id']; break;
-			case $playertypes['program']:   $programs[] = $player['id']; break;
-			case $playertypes['baseline']:
+			case P_PERSON:    $persons[] = $player['id']; break;
+			case P_PROGRAM:   $programs[] = $player['id']; break;
+			case P_BASELINE:
 				undefset($baselines[$player['parent']], array());
 				$baselines[$player['parent']][] = $player['id'];
 				break;
-			case $playertypes['testgroup']:
+			case P_TESTGROUP:
 				undefset($testgroups[$player['parent']], array());
 				$testgroups[$player['parent']][] = $player['id'];
 				break;
-			case $playertypes['testcase']:
+			case P_TESTCASE:
 				undefset($testcases[$player['parent']], array());
 				$testcases[$player['parent']][] = $player['id'];
 				break;
@@ -72,7 +72,7 @@ $('a.newhuman').live('click', function(e){
 		'<td><a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a></td></tr>');
 	tr.find('a.save').click(function(e){
 		e.preventDefault();
-		var input = tr.input_obj({type: <?= $playertypes['person'] ?> });
+		var input = tr.input_obj({type: <?= P_PERSON ?> });
 		$.post("/players/save", input, function(data){
 			if(data.error){
 				alert(data.error);
@@ -102,7 +102,7 @@ $('a.edithuman').live('click', function(e){
 	var links = $('<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>');
 	links.filter("a.save").click(function(e){
 		e.preventDefault();
-		var input = tr.input_obj({type: <?= $playertypes['person'] ?> });
+		var input = tr.input_obj({type: <?= P_PERSON ?> });
 		$.post("/players/save", input, function(data){
 			if(data.error){
 				alert(data.error);
@@ -131,7 +131,7 @@ $('a.newprogram').live('click', function(e){
 		'<a class="cancel" href="#">Cancel</a></td></tr>');
 	tr.find('a.save').click(function(e){
 		e.preventDefault();
-		var input = tr.input_obj({type: <?= $playertypes['program'] ?> });
+		var input = tr.input_obj({type: <?= P_PROGRAM ?> });
 		$.post("/players/save", input, function(data){
 			if(data.error){
 				alert(data.error);
@@ -168,7 +168,7 @@ $('a.editprogram').live('click', function(e){
 	var links = $('<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>');
 	links.filter("a.save").click(function(e){
 		e.preventDefault();
-		var input = tr.input_obj({type: <?= $playertypes['program'] ?> });
+		var input = tr.input_obj({type: <?= P_PROGRAM ?> });
 		$.post("/players/save", input, function(data){
 			if(data.error){
 				alert(data.error);
@@ -199,7 +199,7 @@ $('a.newbaseline').live('click', function(e){
 	var parent = $(this).attr('parent');
 	tr.find('a.save').click(function(e){
 		e.preventDefault();
-		var input = tr.input_obj({type: <?= $playertypes['baseline'] ?>, 'parent': parent });
+		var input = tr.input_obj({type: <?= P_BASELINE ?>, 'parent': parent });
 		$.post("/players/save", input, function(data){
 			if(data.error){
 				alert(data.error);
@@ -234,7 +234,7 @@ $('a.editbaseline').live('click', function(e){
 	var links = $('<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>');
 	links.filter("a.save").click(function(e){
 		e.preventDefault();
-		var input = tr.input_obj({type: <?= $playertypes['baseline'] ?> });
+		var input = tr.input_obj({type: <?= P_BASELINE ?> });
 		$.post("/players/save", input, function(data){
 			if(data.error){
 				alert(data.error);
@@ -265,7 +265,7 @@ $('a.newtestgroup').live('click', function(e){
 	var parent = $(this).attr('parent');
 	tr.find('a.save').click(function(e){
 		e.preventDefault();
-		var input = tr.input_obj({type: <?= $playertypes['testgroup'] ?>, 'parent': parent });
+		var input = tr.input_obj({type: <?= P_TESTGROUP ?>, 'parent': parent });
 		$.post("/players/save", input, function(data){
 			if(data.error){
 				alert(data.error);
@@ -299,7 +299,7 @@ $('a.edittestgroup').live('click', function(e){
 	var links = $('<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>');
 	links.filter("a.save").click(function(e){
 		e.preventDefault();
-		var input = tr.input_obj({type: <?= $playertypes['testgroup'] ?> });
+		var input = tr.input_obj({type: <?= P_TESTGROUP ?> });
 		$.post("/players/save", input, function(data){
 			if(data.error){
 				alert(data.error);
@@ -329,7 +329,7 @@ $('a.newtestcase').live('click', function(e){
 	var parent = $(this).attr('parent');
 	tr.find('a.save').click(function(e){
 		e.preventDefault();
-		var input = tr.input_obj({type: <?= $playertypes['testcase'] ?>, 'parent': parent });
+		var input = tr.input_obj({type: <?= P_TESTCASE ?>, 'parent': parent });
 		$.post("/players/save", input, function(data){
 			if(data.error){
 				alert(data.error);
@@ -363,7 +363,7 @@ $('a.edittestcase').live('click', function(e){
 	var links = $('<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>');
 	links.filter("a.save").click(function(e){
 		e.preventDefault();
-		var input = tr.input_obj({type: <?= $playertypes['testcase'] ?> });
+		var input = tr.input_obj({type: <?= P_TESTCASE ?> });
 		$.post("/players/save", input, function(data){
 			if(data.error){
 				alert(data.error);
@@ -479,7 +479,7 @@ $('a.edittestcase').live('click', function(e){
 }
 
 function players_save($input, $user){
-	global $db, $playertypes;
+	global $db;
 
 	if($input['name']){
 		if($input['id']){
