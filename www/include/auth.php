@@ -76,5 +76,14 @@ function auth($key){
 	return new User($user);
 }
 
+function auth_api($key){
+	global $db;
 
+	if($key == "")
+		return new User();
+
+	$user = $db->pquery("SELECT * FROM users WHERE apikey = ?", $key)->fetchrow();
+
+	return new User($user);
+}
 
