@@ -155,7 +155,7 @@ class MysqlDb {
 				$ret = array();
 				foreach($part as $v)
 					$ret[] = $this->prepare_part($v);
-				return implode(',', $ret);
+				return '(' . implode(',', $ret) . ')';
 			default:
 				trigger_error("Bad type passed to the database!!!!", E_USER_ERROR) && exit;
 		}
