@@ -67,7 +67,16 @@ switch($route->auth){
 		break;
 
 	case 'api':
-		trigger_error("api authentication needs doing still...", E_USER_ERROR);
+		//allow normal login or using the apikey cookie
+		if($user->userid == 0){
+			$user = auth_api(def($_COOKIE['apikey'], ''));
+
+			if($user->userid == 0){
+				json_error("Invalid api key");
+				exit;
+			}
+		}
+		break;
 
 	default:
 		die("This route has an unknown auth type: " . $route->auth);
