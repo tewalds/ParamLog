@@ -15,6 +15,16 @@ function json($var){
 	return json_encode($var);
 }
 
+//returns false so it can be done as part of a return statement from a page
+function echo_json($data){
+	echo json($data);
+	return false;
+}
+function json_error($str){
+	echo json(array("error" => $str));
+	return false;
+}
+
 function h($var){
 	switch(gettype($var)){
 		case 'string': return htmlentities($var);
@@ -37,6 +47,12 @@ function def( & $var, $def){
 function undefset( & $var, $def){
 	if(!isset($var))
 		$var = $def;
+}
+
+function swap(& $a, & $b){
+	$tmp = $a;
+	$a = $b;
+	$b = $tmp;
 }
 
 function redirect($loc){
