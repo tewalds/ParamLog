@@ -70,6 +70,9 @@ class PHPRouter {
 			$type = $type[0];
 		}
 
+		if($type == "str")
+			$type = "string";
+
 		switch($type){
 			case "int":
 			case "integer":
