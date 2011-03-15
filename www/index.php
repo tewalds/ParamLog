@@ -37,11 +37,14 @@ $router->add("GET", "/results",        "results.php", "showresults", 'user', arr
 $router->add("GET", "/results/hosts",  "results.php", "gethosts",    'user', null);
 $router->add("GET", "/results/recent", "results.php", "getrecent",   'user', null);
 
-$router->add("GET",  "/players",        "players.php", "players_list",   'user', null);
-$router->add("POST", "/players/save",   "players.php", "players_save",   'user', array("id" => "int", "type" => "int", "parent" => "int", "name" => "string", "params" => "string", "weight" => "int"));
+$router->add("GET",  "/players",        "players.php", "players_list", 'user', null);
+$router->add("POST", "/players/save",   "players.php", "players_save", 'user', array("id" => "int", "type" => "int", "parent" => "int", "name" => "string", "params" => "string", "weight" => "int"));
 
-$router->add("GET", "/api/getwork", "api.php", "getwork", 'api', null);
-$router->add("POST","/api/submit",  "api.php", "submit",  'api', array("baseline" => "int", "player" => "int", "size" => "int", "time" => "int", "outcome" => "int", "log" => "string"));
+$router->add("GET", "/api/getwork",     "api.php", "getwork",        'api', null);
+$router->add("GET", "/api/lookup",      "api.php", "lookup_game_id", 'api', array("lookup" => "string"));
+$router->add("POST","/api/savegame",    "api.php", "save_game",      'api', array("id" => "int", "player1" => "int", "player2" => "int", "size" => "int", "time" => "int", "lookup" => "str", "outcome1" => "int", "outcome2" => "int", "outcomeref" => "int", "host" => "str"));
+$router->add("POST","/api/addmove",     "api.php", "add_move",       'api', array("gameid" => "int", "movenum" => "int", "position" => "str", "side" => "int", "value" => "float", "outcome" => "int", "timetaken" => "float", "work" => "int", "comment" => "str"));
+$router->add("POST","/api/saveresult",  "api.php", "save_result",    'api', array("player1" => "int", "player2" => "int", "size" => "int", "time" => "int", "outcome" => "int"));
 
 
 $route = $router->route();
