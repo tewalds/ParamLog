@@ -135,6 +135,14 @@ function getwork($data, $user){
 		ORDER BY priority ASC, RAND()",
 			$u, $u, $u, $u, $u, $u, $u, $u, $u, $u)->fetchrow();
 
+	settype($row['timeid'],   'int');
+	settype($row['timemove'], 'float');
+	settype($row['timegame'], 'float');
+	settype($row['timesims'], 'int');
+	settype($row['sizeid'],   'int');
+	settype($row['p1id'],     'int');
+	settype($row['p2id'],     'int');
+
 	echo json($row);
 
 	return false;
