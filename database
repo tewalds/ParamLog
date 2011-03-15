@@ -4,20 +4,22 @@ times
 - userid
 - weight
 - name
-- params
+- move
+- game
+- sims
 
 sizes
 - id
 - userid
 - weight
 - name
-- params
+- size
 
 players
 - id
 - userid
 - parent
-- type (program, baseline, testgroup, specialization, person)
+- type (person. program, baseline, testgroup, testcase)
 - weight
 - name
 - param
@@ -27,10 +29,10 @@ Person - unplayable
 Program - playable
 - baseline - a complete configuration of a program
 - testgroup - a group of tests that test the same feature with different values, 
-  - specialization - different values for that feature
+  - testcase - different values for that feature
 
 
-timeid, timeparam,
+timeid, timemove, timegame, timesims,
 sizeid, sizeparam,
 p1id, p1cmd, p1config,
 p2id, p2cmd, p2config, p2test
@@ -39,7 +41,9 @@ p2id, p2cmd, p2config, p2test
 round robin of baselines
 	SELECT
 		times.id     as timeid,
-		times.param  as timeparam,
+		times.move   as timemove,
+		times.game   as timegame,
+		times.sims   as timesims,
 		sizes.id     as sizeid,
 		sizes.param  as sizeparam,
 		p1base.id    as p1id,
@@ -55,12 +59,13 @@ round robin of baselines
 		JOIN players AS p2prog
 		JOIN players AS p2base
 		JOIN sizes
-		JOIN timelimits
+		JOIN times
 		LEFT JOIN results ON 
+			results.userid = ? AND
 			results.player1 = p1base.id AND
 			results.player2 = p2base.id AND
 			results.size = sizes.id AND
-			results.timelimit = timelimits.id
+			results.timelimit = times.id
 	WHERE
 		p1prog.userid = ? AND
 		p2prog.userid = ? AND
@@ -82,7 +87,7 @@ round robin of baselines
 		p2prog.weight > 0 AND
 		p2base.weight > 0 AND
 		sizes.weight > 0 AND
-		timelimits.weight > 0 AND
+		times.weight > 0 AND
 		(results.weight IS NULL OR results.weight > 0)
 	ORDER BY
 		(IF(results.numgames IS NULL, 0, results.numgames) / (
@@ -91,7 +96,7 @@ round robin of baselines
 			p2prog.weight *
 			p2base.weight *
 			sizes.weight *
-			timelimits.weight *
+			times.weight *
 			IF(results.weight IS NULL, 1, results.weight) )) ASC,
 		RAND() 
 	LIMIT 1
@@ -100,7 +105,9 @@ round robin of baselines
 baselines against test specializations of the same program
 	SELECT
 		times.id     as timeid,
-		times.param  as timeparam,
+		times.move   as timemove,
+		times.game   as timegame,
+		times.sims   as timesims,
 		sizes.id     as sizeid,
 		sizes.param  as sizeparam,
 		p1base.id    as p1id,
@@ -117,12 +124,13 @@ baselines against test specializations of the same program
 		JOIN players AS p2group
 		JOIN players AS p2test
 		JOIN sizes
-		JOIN timelimits
-		LEFT JOIN results ON 
+		JOIN times
+		LEFT JOIN results ON
+			results.userid = ? AND
 			results.player1 = p1base.id AND
 			results.player2 = p2test.id AND
 			results.size = sizes.id AND
-			results.timelimit = timelimits.id
+			results.timelimit = times.id
 	WHERE
 		p1prog.userid = ? AND
 		p2prog.userid = ? AND
@@ -145,7 +153,7 @@ baselines against test specializations of the same program
 		p2group.weight > 0 AND
 		p2test.weight > 0 AND
 		sizes.weight > 0 AND
-		timelimits.weight > 0 AND
+		times.weight > 0 AND
 		(results.weight IS NULL OR results.weight > 0)
 	ORDER BY
 		(IF(results.numgames IS NULL, 0, results.numgames) / (
@@ -155,7 +163,7 @@ baselines against test specializations of the same program
 			p2group.weight *
 			p2test.weight *
 			sizes.weight *
-			timelimits.weight *
+			times.weight *
 			IF(results.weight IS NULL, 1, results.weight) )) ASC,
 		RAND() 
 	LIMIT 1
@@ -164,7 +172,7 @@ baselines against test specializations of the same program
 
 results
 - player1
-- player2 ((player1.type = 'baseline && player2.type = 'test') || (p1ayer1.id < player2.id))
+- player2 ((player1.type = 'baseline' && player2.type = 'test') || (p1ayer1.id < player2.id))
 - size
 - timelimit
 - weight
