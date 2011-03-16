@@ -174,12 +174,12 @@ function save_game($data, $user){
 			return json_error("Missing params");
 
 		if(!$data['host'])
-			$data['host'] = gethostbyaddr($_ENV["REMOTE_ADDR"]);
+			$data['host'] = gethostbyaddr($_SERVER["REMOTE_ADDR"]);
 
 		$data['id'] = $db->pquery("INSERT INTO games SET userid = ?, lookup = ?, player1 = ?, player2 = ?, size = ?, time = ?,
 			timestamp = ?, outcome1 = ?, outcome2 = ?, outcomeref = ?, host = ?",
 			$user->userid, $data['lookup'], $data['player1'], $data['player2'], $data['size'], $data['time'],
-			time(), $data['outcome1'], $data['outcome2'], $data['outcomeref'], $host)->insertid();
+			time(), $data['outcome1'], $data['outcome2'], $data['outcomeref'], $data['host'])->insertid();
 	}
 	$row = $db->pquery("SELECT * FROM games WHERE userid = ? && id = ?", $user->userid, $data['id'])->fetchrow();
 	echo json(h($row));
@@ -202,6 +202,8 @@ function add_move($data, $user){
 	$id = $db->pquery("INSERT INTO moves SET userid = ?, gameid = ?, movenum = ?, position = ?, side = ?,
 		value = ?, outcome = ?, timetaken = ?, work = ?, comment = ?", $user->userid, $data['gameid'], $data['movenum'],
 		$data['position'], $data['side'], $data['value'], $data['outcome'], $data['timetaken'], $data['work'], $data['comment'])->insertid();
+
+	$db->pquery("UPDATE games SET nummoves = nummoves + 1 WHERE userid = ? && id = ?", $user->userid, $data['gameid']);
 
 	return false;
 }
