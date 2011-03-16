@@ -270,12 +270,12 @@ class MysqlDbResult {
 		return $this->insertid;
 	}
 	
-	function rows(){
+	function numrows(){
 //		return mysql_num_rows($this->result);
 		return $this->numrows;
 	}
 
-	function count_rows(){
+	function countrows(){
 		return $this->countrows;
 	}
 
