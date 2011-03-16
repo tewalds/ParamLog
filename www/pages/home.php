@@ -18,6 +18,7 @@ individual games for review. Track progress over time, and with different parame
 		$email = "";
 		$key = "";
 		$longsession = true;
+		$ref = "/";
 		include("templates/loginform.php");
 		echo "<br>";
 		include("templates/createuser.php");
