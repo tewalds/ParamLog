@@ -11,6 +11,7 @@
 	$apikey = "1bab1eae9a58b147de6f7518c6644a38"
 	$benchplayer = Castro
 	$referee = Castro
+	$maxmoves = 1000
 
 	while(ARGV.length > 0)
 		arg = ARGV.shift
@@ -94,7 +95,8 @@ puts game.inspect
 				puts entry['position']
 				log << entry
 
-				break if entry['position'] == "resign"
+				m = entry['position']
+				break if m == "resign" || m == "none" || m == "unknown" || i >= $maxmoves
 
 				#pass the move to the other player
 				players[3-turn].play(side, move)
@@ -143,7 +145,9 @@ puts game.inspect
 			"time"    => game['timeid'],
 			"outcome" => outcomeref || (outcome1 == outcome2 ? outcome1 : 0), #0 is unknown, 1 is p1, 2 is p2, 3 is draw
 		}
-		Net::HTTP.post_form(URI.parse("#{$url}/api/saveresult"), result);
+		if(result['outcome'] != 0)
+			Net::HTTP.post_form(URI.parse("#{$url}/api/saveresult"), result);
+		end
 	rescue
 		puts "An error occurred: #{$!}"
 		puts $@
