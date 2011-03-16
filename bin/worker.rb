@@ -1,23 +1,26 @@
 #!/usr/bin/ruby
 
+	require 'lib.rb'
+	#load all players
+	Dir.open('players').each{|file|
+		require "players/#{file}" if file[-3..-1] == '.rb'
+	}
+
 	$parallel = 1;
-	$time_limit = 0;
-	$player = "./castro"
-	$url = "http://havannah.ewalds.ca";
+	$url = "http://paramlog.local.ewalds.ca";
+	$apikey = "1bab1eae9a58b147de6f7518c6644a38"
+	$benchplayer = Castro
+	$referee = Castro
 
 	while(ARGV.length > 0)
 		arg = ARGV.shift
 		case arg
-		when "-p", "--parallel"  then $parallel   = ARGV.shift.to_i;
-		when "-t", "--timelimit" then $time_limit = ARGV.shift.to_f;
-		when "-u", "--url"       then $url        = ARGV.shirt;
+		when "-p", "--parallel"  then $parallel = ARGV.shift.to_i;
 		when "-h", "--help"      then
 			puts "Run a worker process that plays games between players that understand GTP"
 			puts "based on a database of players, baselines, sizes and times"
 			puts "Usage: #{$0} [<options>]"
 			puts "  -p --parallel   Number of games to run in parallel [#{$parallel}]"
-			puts "  -t --timelimit  Run the worker for this long before exiting [#{$time_limit}]"
-			puts "  -u --url        Get work to do from this url [#{$url}]"
 			puts "  -h --help       Print this help"
 			exit;
 		else
@@ -27,127 +30,126 @@
 	end
 
 
-require 'lib.rb'
 require 'net/http'
+require 'json'
 
-expectedtime = 11.0 # expect 11 seconds
-benchtime = timer { system($player, "-f", "test/speed4.tst"); }
-
-puts "benchtime: " + benchtime.inspect
-
-exit if benchtime < 1.0
-
-time_factor = benchtime / expectedtime
-
+puts "benchmarking..."
+time_factor = scaletime($benchplayer.benchtime){ $benchplayer.benchmark }
 puts "time_factor: " + time_factor.inspect
 
 
 n = 0;
 loop_fork($parallel) {
 	n += 1;
-	gtp = [nil, nil, nil]
+	players = [nil, nil, nil] #ref, p1, p2
 	begin
-		req = Net::HTTP.get(URI.parse("#{$url}/api/getwork"));
+		game = JSON.parse(Net::HTTP.get(URI.parse("#{$url}/api/getwork?apikey=#{$apikey}")));
 
-		req = req.strip.split("\n").map{|s| s.split(" ", 2) }
-		req = Hash[*(req.flatten)]
+puts game.inspect
 
-		tp = req['tp'].split(" ")
-		req['tp'] = "-g #{(tp[0].to_f*time_factor).to_f} -m #{(tp[1].to_f*time_factor).to_f} -s #{tp[2]}"
+		game['timemove'] *= time_factor
+		game['timegame'] *= time_factor
 
-puts req.inspect
+		players[0] = $referee.new
+		players[1] = Object.const_get(game['p1cmd']).new
+		players[2] = Object.const_get(game['p2cmd']).new
 
-#		baselines.baseline AS b,
-#		baselines.params AS bp,
-#		players.player AS p,
-#		players.params AS pp,
-#		sizes.size AS s,
-#		sizes.params AS sp,
-#		times.time AS t,
-#		times.params AS tp
-
-		player = rand(2) + 1;
-
-		gtp[1] = GTPClient.new($player)
-		gtp[2] = GTPClient.new($player)
-
-
-		log = "";
-
-		$cmds = [
-			"time #{req['tp']}",
-			"boardsize #{req['sp']}",
-			"player_params #{req['bp']}",
-		]
-
-
-		#send the initial commands
-		$cmds.each{|cmd|
-			puts cmd;
-			log << cmd + "\n"
-
-			gtp[1].cmd(cmd);
-			gtp[2].cmd(cmd);
+		players.each{|p|
+			p.time(game['timemove'], game['timegame'], game['timesims'])
+			p.boardsize(game['sizeparam'])
 		}
 
-		puts "player_params #{req['pp']}";
-		gtp[player].cmd("player_params #{req['pp']}");
+		players[1].params(game['p1config'])
+		players[2].params(game['p2config'])
+		players[2].params(game['p2test'])
 
-		turnstrings = ["draw","white","black"];
-
-		turn = 1;
+		turn = 1;           #which player is making the move
+		side = rand(2) + 1; #which side is the player making the move for
 		i = 1;
-		ret = nil;
+		move = nil;
+		log = []
+		moveresult = {"movenum" => 0, "position" => "", "side" => 0, "value" => 0, "outcome" => 0, "timetaken" => 0, "work" => 0, "comment" => ""}
 		totaltime = timer {
-		loop{
-			$0 = "Game #{n} move #{i}, size #{req['sp']}"
-			i += 1;
+			loop{
+				$0 = "Game #{n} move #{i}, size #{game['sizeparam']}"
 
-			#ask for a move
-			print "genmove #{turnstrings[turn]}: ";
-			time = timer {
-				ret = gtp[turn].cmd("genmove #{turnstrings[turn]}")[2..-3];
+				#ask for a move
+				print "genmove #{side}: ";
+				time = timer {
+					move = players[turn].genmove(side)
+				}
+
+				entry = moveresult.dup
+				entry['movenum']   = i
+				entry['side']      = side
+				entry['timetaken'] = time
+
+				if(move.class == String)
+					entry['position'] = move
+				else
+					entry.merge! move
+					raise "Invalid move, must define 'position' value" if !entry['position'] || entry['position'] == ''
+				end
+
+				puts entry['position']
+				log << entry
+
+				break if entry['position'] == "resign"
+
+				#pass the move to the other player
+				players[3-turn].play(side, move)
+				players[0].play(side, move)
+
+				i += 1;
+				turn = 3-turn;
+				side = 3-side;
 			}
-			puts ret
-
-			break if(ret == "resign" || ret == "none")
-
-			turn = 3-turn;
-
-			#pass the move to the other player
-			gtp[turn].cmd("play #{turnstrings[3-turn]} #{ret}");
-
-			log << "play #{turnstrings[3-turn]} #{ret}\n"
-			log << "# took #{time} seconds\n\n"
-		}
 		}
 
-		ret = gtp[1].cmd("havannah_winner")[2..-3];
-		turn = turnstrings.index(ret);
+		outcomeref = players[0].winner
+		outcome1   = players[1].winner
+		outcome2   = players[2].winner
 
-		log << "# Winner: #{ret}\n"
-		log << "# Total time: #{totaltime} seconds\n"
+		players.each{|p|
+			p.quit
+		}
 
-		gtp[1].cmd("quit");
-		gtp[2].cmd("quit");
-
-		gtp[1].close;
-		gtp[2].close;
-
+		#save the game
 		result = {
-			"baseline" => req['b'],
-			"player" => req['p'],
-			"size" => req['s'],
-			"time" => req['t'],
-			"outcome" => (turn == 0 ? turn : (turn == player ? 2 : 1)), # tie = 0, loss = 1, win = 2
-			"log" => log,
+			"apikey"  => $apikey,
+			"player1" => game['p1id'],
+			"player2" => game['p2id'],
+			"size"    => game['sizeid'],
+			"time"    => game['timeid'],
+			"outcome1" => outcome1,
+			"outcome2" => outcome2,
+			"outcomeref" => outcomeref,
+		}
+		res = Net::HTTP.post_form(URI.parse("#{$url}/api/savegame"), result);
+		savegame = JSON.parse(res.body)
+
+		#save the moves
+		log.each{|entry|
+			entry.merge!({ "apikey"  => $apikey, "gameid" => savegame['id'] })
+			Net::HTTP.post_form(URI.parse("#{$url}/api/addmove"), entry);
 		}
 
-		res = Net::HTTP.post_form(URI.parse("#{$url}/api/submit"), result);
+		#save the result
+		result = {
+			"apikey"  => $apikey,
+			"player1" => game['p1id'],
+			"player2" => game['p2id'],
+			"size"    => game['sizeid'],
+			"time"    => game['timeid'],
+			"outcome" => outcomeref || (outcome1 == outcome2 ? outcome1 : 0), #0 is unknown, 1 is p1, 2 is p2, 3 is draw
+		}
+		Net::HTTP.post_form(URI.parse("#{$url}/api/saveresult"), result);
 	rescue
-		gtp[1].close if gtp[1]
-		gtp[2].close if gtp[2]
-		print "An error occurred: ",$!, "\n"
+		puts "An error occurred: #{$!}"
+		puts $@
+		players[0].quit if players[0]
+		players[1].quit if players[1]
+		players[2].quit if players[2]
 		sleep(1);
 	end
 }
