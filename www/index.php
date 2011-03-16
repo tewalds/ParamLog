@@ -33,7 +33,7 @@ $router->add("POST","/lostpassword",  "account.php", "lostpassword",  'anon',  a
 $router->add("GET", "/resetpassword", "account.php", "resetpassword", 'anon',  array("email" => "string", "key" => "string", "newpass" => "string"));
 $router->add("POST","/resetpassword", "account.php", "resetpassword", 'anon',  array("email" => "string", "key" => "string", "newpass" => "string"));
 
-$router->add("GET", "/results",        "results.php", "showresults", 'user', array("baselines" => "array", "times" => "array", "players" => "array", "errorbars" => "bool", "simpledata" => "bool", "data" => "bool", "scale" => "bool"));
+$router->add("GET", "/results",        "results.php", "showresults", 'user', array("baselines" => "array", "times" => "array", "sizes" => "array", "players" => "array", "errorbars" => "bool", "simpledata" => "bool", "data" => "bool", "scale" => "bool"));
 $router->add("GET", "/results/hosts",  "results.php", "gethosts",    'user', null);
 $router->add("GET", "/results/recent", "results.php", "getrecent",   'user', null);
 
@@ -72,7 +72,7 @@ switch($route->auth){
 	case 'api':
 		//allow normal login or using the apikey cookie
 		if($user->userid == 0){
-			$user = auth_api(def($_COOKIE['apikey'], ''));
+			$user = auth_api(def($_REQUEST['apikey'], ''));
 
 			if($user->userid == 0){
 				json_error("Invalid api key");
