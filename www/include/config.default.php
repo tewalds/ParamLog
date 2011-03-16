@@ -7,5 +7,6 @@ $config = array(
 	'db_pass' => 'password',
 
 	'site_name' => "ParamLog",
+	'error_log' => false,
 );
 
