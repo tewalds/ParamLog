@@ -14,7 +14,11 @@ function players_list($input, $user){
 	foreach($players as $player){
 		switch($player['type']){
 			case P_PERSON:    $persons[] = $player['id']; break;
-			case P_PROGRAM:   $programs[] = $player['id']; break;
+			case P_PROGRAM:
+				$programs[] = $player['id'];
+				undefset($baselines[$player['id']], array());
+				undefset($testgroups[$player['id']], array());
+				break;
 			case P_BASELINE:
 				undefset($baselines[$player['parent']], array());
 				$baselines[$player['parent']][] = $player['id'];
@@ -22,6 +26,7 @@ function players_list($input, $user){
 			case P_TESTGROUP:
 				undefset($testgroups[$player['parent']], array());
 				$testgroups[$player['parent']][] = $player['id'];
+				undefset($testcases[$player['id']], array());
 				break;
 			case P_TESTCASE:
 				undefset($testcases[$player['parent']], array());
