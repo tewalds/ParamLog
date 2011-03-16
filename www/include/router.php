@@ -122,6 +122,7 @@ class PHPRouter {
 	}
 
 	function fourohfour($data, $user, $url){
+		header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
 		echo "404 - page not found!<br/>" . htmlentities($url);
 	}
 }
