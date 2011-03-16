@@ -45,7 +45,7 @@ function createsession($email, $password, $timeout){
 function destroysession($key){
 	global $db;
 	$db->pquery("DELETE FROM sessions WHERE sessionkey = ?", $key);
-	setcookie("session", "", time() - 100000);
+	setcookie("session", "", time() - 1000000, "/");
 	return new User();
 }
 
@@ -67,7 +67,7 @@ function auth($key){
 		return destroysession($key);
 
 	if($time - $session['cookietime'] > 1800){
-		setcookie("session", $key, $time + $session['timeout'] + 3600);
+		setcookie("session", $key, $time + $session['timeout'] + 3600, "/");
 		$session['cookietime'] = $time;
 	}
 
