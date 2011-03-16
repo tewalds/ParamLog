@@ -229,11 +229,11 @@ function save_result($data, $user){
 	$numrows = $db->pquery("SELECT id FROM times WHERE userid = ? && id = ?", $user->userid, $data['time'])->numrows();
 	if($numrows != 1) return json_error("Invalid time");
 
-	$db->pquery("INSERT INTO results SET userid = ?, player1 = ?, player2 = ?, size = ?, time = ?, weight = 1, wins = ?, losses = ?, ties = ?, numgames = 1
-		ON DUPLICATE KEY UPDATE wins = wins + ?, losses = losses + ?, ties = ties + ?, numgames = numgames + 1",
+	$db->pquery("INSERT INTO results SET userid = ?, player1 = ?, player2 = ?, size = ?, time = ?, weight = 1, p1wins = ?, p2wins = ?, ties = ?, numgames = 1
+		ON DUPLICATE KEY UPDATE p1wins = p1wins + ?, p2wins = p2wins + ?, ties = ties + ?, numgames = numgames + 1",
 		$user->userid, $data['player1'], $data['player2'], $data['size'], $data['time'],
-		(int)($data['outcome'] == 2), (int)($data['outcome'] == 1), (int)($data['outcome'] == 3),
-		(int)($data['outcome'] == 2), (int)($data['outcome'] == 1), (int)($data['outcome'] == 3));
+		(int)($data['outcome'] == 1), (int)($data['outcome'] == 2), (int)($data['outcome'] == 3),
+		(int)($data['outcome'] == 1), (int)($data['outcome'] == 2), (int)($data['outcome'] == 3));
 
 	echo "1";
 	return false;
