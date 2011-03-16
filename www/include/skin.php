@@ -18,8 +18,7 @@ function skin($user, $body){
 		<title><?= $config['site_name'] ?></title>
 
 		<link rel="stylesheet" href="/static/basic.css" type="text/css" />
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
-		<!-- script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js"></script-->
+		<script src="/static/jquery-1.5.1.min.js"></script>
 	</head>
 	<body>
 
