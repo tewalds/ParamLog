@@ -14,6 +14,7 @@ class Castro < Player
 	def initialize(exec = nil)
 		exec ||= "#{@@path}/#{@@exec}"
 		@gtp = GTPClient.new exec
+		@gtp.cmd "hguicoords"
 	end
 	def quit
 		@gtp.cmd "quit"
