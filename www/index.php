@@ -34,7 +34,8 @@ $router->add("POST","/lostpassword",  "account.php", "lostpassword",  'anon',  a
 $router->add("GET", "/resetpassword", "account.php", "resetpassword", 'anon',  array("email" => "string", "key" => "string", "newpass" => "string"));
 $router->add("POST","/resetpassword", "account.php", "resetpassword", 'anon',  array("email" => "string", "key" => "string", "newpass" => "string"));
 
-$router->add("GET", "/results",        "results.php", "showresults", 'user', array("baselines" => "array", "times" => "array", "sizes" => "array", "players" => "array", "errorbars" => "bool", "simpledata" => "bool", "data" => "bool", "scale" => "bool"));
+$router->add("GET", "/results",        "results.php", "showresults", 'user', null);
+$router->add("GET", "/results/data",   "results.php", "getdata",     'user', array("players" => "array", "baselines" => "array", "times" => "array", "sizes" => "array", "scale" => "bool"));
 $router->add("GET", "/results/hosts",  "results.php", "gethosts",    'user', null);
 $router->add("GET", "/results/recent", "results.php", "getrecent",   'user', null);
 

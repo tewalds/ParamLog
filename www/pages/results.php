@@ -14,7 +14,11 @@ function showresults($input, $user){
 	foreach($players as $player){
 		switch($player['type']){
 			case P_PERSON:    $persons[] = $player['id']; break;
-			case P_PROGRAM:   $programs[] = $player['id']; break;
+			case P_PROGRAM:
+				$programs[] = $player['id'];
+				undefset($baselines[$player['id']], array());
+				undefset($testgroups[$player['id']], array());
+				break;
 			case P_BASELINE:
 				undefset($baselines[$player['parent']], array());
 				$baselines[$player['parent']][] = $player['id'];
@@ -22,6 +26,7 @@ function showresults($input, $user){
 			case P_TESTGROUP:
 				undefset($testgroups[$player['parent']], array());
 				$testgroups[$player['parent']][] = $player['id'];
+				undefset($testcases[$player['id']], array());
 				break;
 			case P_TESTCASE:
 				undefset($testcases[$player['parent']], array());
@@ -37,24 +42,24 @@ function showresults($input, $user){
 	$numgames = $db->pquery("SELECT count(*) FROM games WHERE userid = ?", $user->userid)->fetchfield();
 
 ?>
-	<table><form action=/results method=GET>
+	<table><form action=/results/data method=GET>
 		<tr>
-			<td valign="top" rowspan="3">
+			<td valign="top" rowspan="2">
 				Players:<br>
 				<select name=players[] multiple=multiple size=20 style='width: 375px'>
 				<? foreach($programs as $pid){
 					$player = $players[$pid]; ?>
-					<option class="program" value="<?= $pid ?>" disabled='disabled'<?= selected($pid, $input['players']) ?>><?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
+					<option class="program" value="<?= $pid ?>" disabled="disabled"><?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
 					<? foreach($baselines[$pid] as $bid){
 						$player = $players[$bid]; ?>
-						<option class="baseline" value="<?= $bid ?>"<?= selected($bid, $input['players']) ?>>&nbsp;&nbsp;&nbsp;<?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
+						<option class="baseline" value="<?= $bid ?>">&nbsp;&nbsp;&nbsp;<?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
 					<? }
 					foreach($testgroups[$pid] as $gid){
 						$player = $players[$gid]; ?>
-						<option class="testgroup" value="<?= $gid ?>"<?= selected($gid, $input['players']) ?>>&nbsp;&nbsp;&nbsp;<?= h($player['name']) ?></option>
+						<option class="testgroup" value="<?= $gid ?>">&nbsp;&nbsp;&nbsp;<?= h($player['name']) ?></option>
 						<? foreach($testcases[$gid] as $tid){
 							$player = $players[$tid]; ?>
-							<option class="testcase" value="<?= $tid ?>"<?= selected($tid, $input['players']) ?>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
+							<option class="testcase" value="<?= $tid ?>">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
 						<? }
 					}
 				} ?>
@@ -65,10 +70,10 @@ function showresults($input, $user){
 				<select name="baselines[]" multiple="multiple" style='width: 500px'>
 				<? foreach($programs as $pid){
 					$player = $players[$pid]; ?>
-					<option class="program" value="<?= $pid ?>" disabled='disabled'<?= selected($pid, $input['baselines']) ?>><?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
+					<option class="program" value="<?= $pid ?>" disabled='disabled'><?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
 					<? foreach($baselines[$pid] as $bid){
 						$player = $players[$bid]; ?>
-						<option class="baseline" value="<?= $bid ?>"<?= selected($bid, $input['baselines']) ?>>&nbsp;&nbsp;&nbsp;<?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
+						<option class="baseline" value="<?= $bid ?>">&nbsp;&nbsp;&nbsp;<?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
 					<? }
 				} ?>
 				</select>
@@ -77,61 +82,178 @@ function showresults($input, $user){
 		<tr>
 			<td valign="top">
 				Time Limit:<br>
-				<select name="times[]" multiple="multiple" style='width: 245px'>
+				<select name="times[]" multiple="multiple" style='width: 300px'>
 				<? foreach($times as $time){ ?>
-					<option value="<?= $time['id'] ?>" <?= selected($time['id'], $input['times']) ?>><?= h($time['name']) ?> (<?= h($time['move']) . " " . h($time['game']) . " " . h($time['sims']) ?>)</option>
+					<option value="<?= $time['id'] ?>"><?= h($time['name']) ?> (<?= h($time['move']) . " " . h($time['game']) . " " . h($time['sims']) ?>)</option>
 				<? } ?>
 				</select>
+				<br><br>
+				<?= makeCheckBox("scale", "Scale Graph") ?><br>
+				<?= makeCheckBox("errorbars", "Show Errorbars") ?><br>
+				<?= makeCheckBox("simpledata", "Show Simple Data") ?><br>
+				<?= makeCheckBox("data", "Show Data") ?><br>
+				<br>
+				<input id='submit' type='submit' value="Show Graph!"> <?= $numgames ?> games logged
 			</td>
 			<td valign="top">
 				Board Sizes:<br>
-				<select name="sizes[]" multiple="multiple" style='width: 245px'>
+				<select name="sizes[]" multiple="multiple" style='width: 195px'>
 				<? foreach($sizes as $time){ ?>
-					<option value="<?= $time['id'] ?>" <?= selected($time['id'], $input['sizes']) ?>><?= h($time['name']) ?> (<?= h($time['size']) ?>)</option>
+					<option value="<?= $time['id'] ?>"><?= h($time['name']) ?> (<?= h($time['size']) ?>)</option>
 				<? } ?>
 				</select>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" colspan="2">
-				<?= makeCheckBox("scale", "Scale Graph", $input['scale']) ?><br>
-				<?= makeCheckBox("errorbars", "Show Errorbars", $input['errorbars']) ?><br>
-				<?= makeCheckBox("simpledata", "Show Simple Data", $input['simpledata']) ?><br>
-				<?= makeCheckBox("data", "Show Data", $input['data']) ?><br>
-				<br>
-				<input type=submit value="Show Graph!"> <?= $numgames ?> games logged
 			</td>
 		</tr>
 	</form></table>
 
+<div id="chartdiv" style="height:500px;width:800px; "></div>
+
+<script>
+$.jqplot.config.enablePlugins = true;
+
+$('form').submit(function(e){
+	e.preventDefault();
+
+	$.get("/results/data", $(this).serialize(), function(data){
+		if(data.error){
+			alert(data.error);
+		}else{
+//			alert(data);
+			data.options.axes.xaxis.renderer = $.jqplot.CategoryAxisRenderer;
+
+			$('#chartdiv').empty();
+			$.jqplot('chartdiv', data.data, data.options);
+		}
+	}, 'json');
+
+});
+
+</script>
 
 <?
 
-	if(count($input['baselines']) == 0 && count($input['players']) == 0 && count($input['times']) == 0)
-		return true;
+	return true;
+}
 
-	if(count($input['baselines']) == 0 || count($input['players']) == 0 || count($input['times']) == 0){
-		echo "You must select options from all categories to see any results!";
-		return true;
+
+function getdata($input, $user){
+	global $db;
+
+
+	if(empty($input['players']) || empty($input['baselines']) || empty($input['sizes']) || empty($input['times'])){
+		echo json(array('error' => "You must select options from all categories to see any results!", 'input' => $input));
+		return false;
+		return json_error("You must select options from all categories to see any results!");
 	}
 
-	$data = $db->pquery(
-		"SELECT 
-			results.player, 
-			players.name, 
-			sizes.params as size,
-			SUM(wins) as wins,
-			SUM(losses) as losses,
-			SUM(ties) as ties,
-			SUM(numgames) as numgames
-		FROM results 
-			JOIN players USING (player) 
-			JOIN sizes USING (size)
-		WHERE baseline IN (?) AND player IN (?) AND time IN (?)
-		GROUP BY player, size
-		ORDER BY name, results.size",
-		$input['baselines'], $input['players'], $input['times'])->fetchrowset();
+	$ids = array_merge($input['players'], $input['baselines']);
+	$baselineids = array_combine($input['baselines'], $input['baselines']);
+	$playerids = array_combine($input['players'], $input['players']);
 
+	$players = $db->pquery("SELECT id, type, name FROM players WHERE userid = ? && id IN ?", $user->userid, $ids)->fetchrowset('id');
+
+	$res = $db->pquery("SELECT * FROM results WHERE userid = ? && player1 IN ? && player2 IN ? && time IN ? && size IN ?",
+			$user->userid, $ids, $ids, $input['times'], $input['sizes']);
+
+	$rawdata = array();
+	while($line = $res->fetchrow()){
+		$rawdata[] = $line;
+		swap($line['player1'], $line['player2']);
+		swap($line['p1wins'], $line['p2wins']);
+		$rawdata[] = $line;
+	}
+
+	$sizes = $db->pquery("SELECT id, name FROM sizes WHERE userid = ? && id IN ? ORDER BY name", $user->userid, $input['sizes'])->fetchfieldset();
+
+	$defaults = array();
+	foreach($sizes as $s => $n)
+		$defaults[$s] = array('wins' => 0, 'loss' => 0, 'ties' => 0, 'total' => 0, 'rate' => 0, 'err' => 0, 'lb' => 0, 'ub' => 0);
+
+	$data = array(); //	{ playerid => {size => [wins, loss, ties, etc] } }
+	foreach($rawdata as $line){
+		if(!isset($playerids[$line['player2']]))
+			continue;
+		//player1 is a baseline, player2 is a baseline or a testcase
+
+		undefset($data[$line['player2']], $defaults);
+
+		$data[$line['player2']][$line['size']]['wins'] += $line['p2wins'];
+		$data[$line['player2']][$line['size']]['loss'] += $line['p1wins'];
+		$data[$line['player2']][$line['size']]['ties'] += $line['ties'];
+	}
+
+	$lbound = 0.5;
+	$ubound = 0.5;
+	foreach($data as $p => $data2){
+		foreach($data2 as $s => $row){
+			$row['total'] = $row['wins'] + $row['loss'] + $row['ties'];
+			$row['rate']  = ($row['wins'] + $row['ties']/2.0)/$row['total'];
+			$row['err']   = 2.0*sqrt($row['rate']*(1-$row['rate'])/$row['total']);
+			$row['lb']    = max(0, $row['rate'] - $row['err']);
+			$row['ub']    = min(1, $row['rate'] + $row['err']);
+			$data[$p][$s] = $row;
+
+			if($lbound > $row['lb']) $lbound = $row['lb'];
+			if($ubound < $row['ub']) $ubound = $row['ub'];
+		}
+	}
+
+	if($input['scale']){
+		$diff = $ubound - $lbound;
+		$interval = ($diff <= 0.1 ? 0.01 : ($diff <= 0.2 ? 0.02 : ($diff <= 0.6 ? 0.05 : 0.1)));
+		$lbound = max(0, floor($lbound/$interval)*$interval);
+		$ubound = min(1, ceil($ubound/$interval)*$interval);
+	}else{
+		$interval = 0.1;
+		$lbound = 0;
+		$ubound = 1;
+	}
+
+
+	$options = array(
+		'seriesDefaults' => array('shadow' => false),
+		'series' => array(),
+		'legend' => array('show' => true),
+		'axes'   => array(
+			'yaxis' => array(
+				'min' => $lbound*100,
+				'max' => $ubound*100,
+				'ticks' => range($lbound*100, $ubound*100, $interval*100),
+			),
+			'xaxis' => array(
+				'show' => true,
+//				'renderer' => "$.jqplot.CategoryAxisRenderer", //must be done after the fact, since json can't reference the actual object
+				'ticks' => array_values($sizes),
+				'tickOptions' => array("formatString" => "%d"),
+			),
+		),
+	);
+	$output = array();
+	$output[] = array_fill(0, count($sizes), 50);
+	$options['series'][] = array('color' => "#FF0000", "lineWidth" => 1, "shadow" => false, 'showMarker' => false, 'label' => ' ');
+
+	foreach($data as $p => $data2){
+		$line = array();
+		foreach($data2 as $s => $row)
+			$line[] = round($row['rate']*100, 2);
+//			$line[] = array($s, round($row['rate']*100, 2));
+		$output[] = $line;
+		$options['series'][] = array('label' => h($players[$p]['name']));
+	}
+
+	echo json(array('data'=> $output, 'options' => $options, 'blah' => $data));
+	return false;
+}
+/*
+	$num = count($chd);
+
+	$chdlines = $chd;
+	foreach($chdlines as & $line)  $line = implode(",", $line);
+
+	$errorlines = "";
+	if($input['errorbars'])
+		foreach($chd as $k => $v)
+			$errorlines .= "|" . implode(",", $chm1[$k]) . "|" . implode(",", $chm2[$k]);
 
 	$colors = array(
 		"000000",
@@ -148,59 +270,6 @@ function showresults($input, $user){
 		"77FF00",
 		"FF7700"
 	);
-
-	$lbound = 50;
-	$ubound = 50;
-	$chd = array();
-	$chm1 = array();
-	$chm2 = array();
-	$legend = array();
-	foreach($data as $row){
-		if(!isset($chd[$row['player']]))  $chd[$row['player']] = array(-1,-1,-1,-1,-1,-1,-1);
-		if(!isset($chm1[$row['player']])) $chm1[$row['player']] = array(-1,-1,-1,-1,-1,-1,-1);
-		if(!isset($chm2[$row['player']])) $chm2[$row['player']] = array(-1,-1,-1,-1,-1,-1,-1);
-
-		$legend[$row['player']] = $row['name'];
-
-		$rate = ($row['wins'] + $row['ties']/2.0)/$row['numgames'];
-		$err = 2.0*sqrt($rate*(1-$rate)/$row['numgames']);
-
-		$rate *= 1000;
-		$err  *= 1000;
-
-		if($lbound > $rate/10) $lbound = $rate/10;
-		if($ubound < $rate/10) $ubound = $rate/10;
-
-		$chd[$row['player']][$row['size']-4] = round($rate);
-		$chm1[$row['player']][$row['size']-4] = max(round($rate - $err), 0);
-		$chm2[$row['player']][$row['size']-4] = min(round($rate + $err), 1000);
-	}
-
-	if($input['scale']){
-		$diff = $ubound - $lbound;
-		$interval = ($diff <= 10 ? 1 : ($diff <= 20 ? 2 : ($diff <= 60 ? 5 : 10)));
-		$lbound = max(0, floor($lbound/$interval)*$interval);
-		$ubound = min(100, ceil($ubound/$interval)*$interval);
-	}else{
-		$interval = 10;
-		$lbound = 0;
-		$ubound = 100;
-	}
-
-#	ksort($chd);
-#	ksort($chm1);
-#	ksort($chm2);
-#	ksort($legend);
-
-	$num = count($chd);
-
-	$chdlines = $chd;
-	foreach($chdlines as & $line)  $line = implode(",", $line);
-
-	$errorlines = "";
-	if($input['errorbars'])
-		foreach($chd as $k => $v)
-			$errorlines .= "|" . implode(",", $chm1[$k]) . "|" . implode(",", $chm2[$k]);
 
 	$chco = implode(",", array_slice($colors, 0, $num));
 
@@ -381,4 +450,4 @@ function getrecent($input, $user){
 	return true;
 }
 
-
+*/
