@@ -6,13 +6,14 @@ def timer
 end
 
 class GTPClient
-	def initialize(cmdline)
+	def initialize(cmdline, newline = "\n")
 		@io=IO.popen(cmdline,'w+')
+		@sep = newline + newline
 	end
 	def cmd(c)
 		return "" if c.strip == ""
 		@io.puts c.strip
-		return @io.gets("\n\n")
+		return @io.gets(@sep)
 	end
 	def close
 		@io.close
