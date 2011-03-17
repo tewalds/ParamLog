@@ -220,8 +220,11 @@ function save_result($data, $user){
 	$rows = $db->pquery("SELECT id, type FROM players WHERE userid = ? && id in ?", $user->userid, array($data['player1'], $data['player2']))->fetchfieldset();
 	if(count($rows) != 2) return json_error("Invalid players");
 
-	if(!(($rows[$data['player1']] == P_BASELINE && $rows[$data['player2']] == P_TESTCASE) || $data['player1'] < $data['player2']))
+	if(!(($rows[$data['player1']] == P_BASELINE && $rows[$data['player2']] == P_TESTCASE) || $data['player1'] < $data['player2'])){
 		swap($data['player1'], $data['player2']);
+		if($data['outcome'] == 1 || $data['outcome'] == 2)
+			$data['outcome'] = 3 - $data['outcome'];
+	}
 
 	$numrows = $db->pquery("SELECT id FROM sizes WHERE userid = ? && id = ?", $user->userid, $data['size'])->numrows();
 	if($numrows != 1) return json_error("Invalid size");
