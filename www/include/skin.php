@@ -16,12 +16,15 @@ function skin($user, $body){
 <html>
 	<head>
 		<title><?= $config['site_name'] ?></title>
+		<link href="/static/basic.css" rel="stylesheet" type="text/css" />
+		<link href="/static/jquery.jqplot.min.css" rel="stylesheet" type="text/css" />
 
-		<link rel="stylesheet" href="/static/basic.css" type="text/css" />
-		<script src="/static/jquery-1.5.1.min.js"></script>
+		<script src="/static/jquery-1.5.1.js"></script>
+		<!--[if IE]><script src="/static/excanvas.min.js" language="javascript" type="text/javascript"></script><![endif]-->
+		<script src="/static/jqplot/jquery.jqplot.js" language="javascript" type="text/javascript"></script>
+		<script src="/static/jqplot/plugins/jqplot.categoryAxisRenderer.js" language="javascript" type="text/javascript"></script>
 	</head>
 	<body>
-
 <div>
 <?
 $first = true;
