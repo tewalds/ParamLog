@@ -34,7 +34,7 @@ class PHPRouter {
 		$uri  = $_SERVER['REQUEST_URI'];
 
 		$url = explode('?', $uri, 2);
-		$url = strtolower($url[0]);
+		$url = $url[0];
 		if(strlen($url) > 1 && $url[strlen($url)-1] == '/')
 			$url = substr($url, 0, strlen($url)-1);
 
