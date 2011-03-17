@@ -23,6 +23,7 @@ function skin($user, $body){
 		<!--[if IE]><script src="/static/excanvas.min.js" language="javascript" type="text/javascript"></script><![endif]-->
 		<script src="/static/jqplot/jquery.jqplot.js" language="javascript" type="text/javascript"></script>
 		<script src="/static/jqplot/plugins/jqplot.categoryAxisRenderer.js" language="javascript" type="text/javascript"></script>
+		<script src="/static/jqplot/plugins/jqplot.highlighter.js" language="javascript" type="text/javascript"></script>
 	</head>
 	<body>
 <div>

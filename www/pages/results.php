@@ -157,10 +157,14 @@ function getdata($input, $user){
 
 	$rawdata = array();
 	while($line = $res->fetchrow()){
-		$rawdata[] = $line;
-		swap($line['player1'], $line['player2']);
-		swap($line['p1wins'], $line['p2wins']);
-		$rawdata[] = $line;
+		if(isset($baselineids[$line['player1']]) && isset($playerids[$line['player2']]))
+			$rawdata[] = $line;
+
+		if(isset($baselineids[$line['player2']]) && isset($playerids[$line['player1']])){
+			swap($line['player1'], $line['player2']);
+			swap($line['p1wins'], $line['p2wins']);
+			$rawdata[] = $line;
+		}
 	}
 
 	$sizes = $db->pquery("SELECT id, name FROM sizes WHERE userid = ? && id IN ? ORDER BY name", $user->userid, $input['sizes'])->fetchfieldset();
@@ -171,10 +175,6 @@ function getdata($input, $user){
 
 	$data = array(); //	{ playerid => {size => [wins, loss, ties, etc] } }
 	foreach($rawdata as $line){
-		if(!isset($playerids[$line['player2']]))
-			continue;
-		//player1 is a baseline, player2 is a baseline or a testcase
-
 		undefset($data[$line['player2']], $defaults);
 
 		$data[$line['player2']][$line['size']]['wins'] += $line['p2wins'];
@@ -224,24 +224,37 @@ function getdata($input, $user){
 				'show' => true,
 //				'renderer' => "$.jqplot.CategoryAxisRenderer", //must be done after the fact, since json can't reference the actual object
 				'ticks' => array_values($sizes),
-				'tickOptions' => array("formatString" => "%d"),
 			),
+		),
+		'highlighter' => array(
+			'tooltipAxes' => 'y',
+			'yvalues' => 7,
+			'formatString' => '<table class="jqplot-highlighter">' .
+				'<tr><td>avg:</td><td>%.2f</td></tr>' .
+				'<tr><td>hi:</td><td>%.2f</td></tr>' .
+				'<tr><td>low:</td><td>%.2f</td></tr>' .
+				'<tr><td>wins:</td><td>%d</td></tr>' .
+				'<tr><td>losses:</td><td>%d</td></tr>' .
+				'<tr><td>ties:</td><td>%d</td></tr>' .
+				'<tr><td>total:</td><td>%d</td></tr>' .
+				'</table>',
 		),
 	);
 	$output = array();
 	$output[] = array_fill(0, count($sizes), 50);
-	$options['series'][] = array('color' => "#FF0000", "lineWidth" => 1, "shadow" => false, 'showMarker' => false, 'label' => ' ');
+	$options['series'][] = array('color' => "#FF0000", "lineWidth" => 1, 'showMarker' => false, 'label' => ' ');
 
 	foreach($data as $p => $data2){
 		$line = array();
+		$i = 0;
 		foreach($data2 as $s => $row)
-			$line[] = round($row['rate']*100, 2);
-//			$line[] = array($s, round($row['rate']*100, 2));
+//			$line[] = round($row['rate']*100, 2);
+			$line[] = array(++$i, round($row['rate']*100,3), round($row['ub']*100,3), round($row['lb']*100,3), $row['wins'], $row['loss'], $row['ties'], $row['total']);
 		$output[] = $line;
 		$options['series'][] = array('label' => h($players[$p]['name']));
 	}
 
-	echo json(array('data'=> $output, 'options' => $options, 'blah' => $data));
+	echo json(array('options' => $options, 'data'=> $output));
 	return false;
 }
 /*
