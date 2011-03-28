@@ -25,77 +25,6 @@ def fib(a)
 	return fib(a-1) + fib(a-2)
 end
 
-class Player
-	def self.benchtime
-		return 10
-	end
-	def self.benchmark
-		fib(34)
-	end
-	def initialize
-		raise "Unimplemented initialize method"
-	end
-	def quit
-		raise "Unimplemented quit method"
-	end
-	def boardsize(size)
-		raise "Unimplemented boardsize method"
-	end
-	def time(move, game, sims)
-		raise "Unimplemented time method"
-	end
-	def params(param)
-		raise "Unimplemented params method"
-	end
-	def play(side, move)
-		raise "Unimplemented play method"
-	end
-	def genmove(side)
-		raise "Unimplemented genmove method"
-		return "move"
-		return {:move => "move", :value => "float", :outcome => "solved outcome", :work => "num simulations", :comment => "" }
-	end
-	def winner #return the winner, one of none, draw, black, white
-		raise "Unimplemented winner method"
-		return "none"
-	end
-end
-
-class GTPPlayer < Player
-	def initialize(exec)
-		@gtp = GTPClient exec
-	end
-	def quit
-		@gtp.cmd "quit"
-		@gtp.close
-	end
-	def boardsize(size)
-		@gtp.cmd "boardsize #{size}"
-	end
-	def play(side, pos)
-		@gtp.cmd "play #{side} #{pos}"
-	end
-	def genmove(side)
-		@gtp.cmd("genmove #{side}")[2..-1].strip;
-	end
-end
-
-
-class NullPlayer < Player
-	def initialize; end
-	def quit; end
-	def boardsize(size); end
-	def time(move, game, sims); end
-	def params(param); end
-	def play(side, move); end
-	def genmove(side)
-		return ""
-	end
-	def winner
-		return nil
-	end
-end
-
 def scaletime(expected, &block)
 	benchtime = timer { block.call }
 
@@ -117,6 +46,26 @@ class Float
 			return (self-0.5).ceil  if self < 0.0
 			return 0
 		end
+	end
+end
+
+class Module
+	#adds attr_accessor to access the class instance variables
+	def class_attr_accessor(*args)
+		args.each{|arg|
+			class_eval %(
+				class << self; attr_accessor :#{arg} end
+			)
+		}
+	end
+	#makes class instance variables accessible as normal instances variables
+	def attr_class_accessor(*args)
+		args.each{|arg|
+			class_eval %(
+				def #{arg}; self.class.#{arg}; end
+				def #{arg}=(v); self.class.#{arg} = v; end
+			)
+		}
 	end
 end
 
