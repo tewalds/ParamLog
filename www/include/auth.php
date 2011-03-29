@@ -5,6 +5,7 @@ class User {
 	public $active;
 	public $email;
 	public $admin;
+	public $apikey;
 
 	function __construct($row = array()){
 		if(empty($row)){
@@ -12,11 +13,13 @@ class User {
 			$this->active = 0;
 			$this->email  = '';
 			$this->admin  = false;
+			$this->apikey = "";
 		}else{
 			$this->userid = (int)$row['userid'];
 			$this->active = (bool)$row['active'];
 			$this->email  = $row['email'];
 			$this->admin  = false;//$row['admin'];
+			$this->apikey = $row['apikey'];
 		}
 	}
 }
