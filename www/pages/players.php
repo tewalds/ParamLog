@@ -142,7 +142,7 @@ $('a.newprogram').live('click', function(e){
 				alert(data.error);
 			}else{
 				tr.replaceWith('<tr class="l"><td><input type="hidden" name="id" value="' + data.id + '"></td>' +
-					'<td>' + data.name + '</td><td></td><td></td>' +
+					'<td>' + data.name + '</td><td>' + data.params + '</td><td>' + data.weight + '</td>' +
 					'<td><a class="editprogram" href="#">Edit</a></td></tr>' +
 					'<tr class="l2"><td></td><td class="spacer" colspan="3"><b>Baselines:</b></td>' +
 					'<td><a class="newbaseline" href="#" parent="' + data.id + '">New Baseline</a></td></tr>' +
