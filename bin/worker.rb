@@ -51,6 +51,8 @@ loop_fork($parallel) {
 
 puts game.inspect
 
+		raise game['error'] if(game['error'])
+
 		game['timemove'] *= time_factor
 		game['timegame'] *= time_factor
 
@@ -159,7 +161,7 @@ puts game.inspect
 		players[0].quit if players[0]
 		players[1].quit if players[1]
 		players[2].quit if players[2]
-		sleep(1);
+		sleep(10);
 	end
 }
 
