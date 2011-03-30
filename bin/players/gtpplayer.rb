@@ -1,6 +1,7 @@
-# A generic GTP player that can set the boardsize and make moves, 
-# but can't set parameters, set time limits nor decide the winner
-# Assumes players are white and black
+# A generic GTP player that can set the boardsize and make and generate moves
+# Can set time limits but not a simulation limit
+# Passes parameters straight through
+# Assumes players are white and black and that it is running with linux line endings
 
 require 'players/player.rb'
 require 'lib.rb'
@@ -14,7 +15,10 @@ class GTPPlayer < Player
 	@sides = ['none', 'white', 'black', 'draw']
 
 	def initialize
-		@gtp = GTPClient.new("#{path}/#{exec}")
+		cmd = ""
+		cmd += path + "/" if path != ""
+		cmd += exec
+		@gtp = GTPClient.new cmd
 	end
 	def quit
 		@gtp.cmd "quit"
@@ -22,6 +26,12 @@ class GTPPlayer < Player
 	end
 	def boardsize(size)
 		@gtp.cmd "boardsize #{size}"
+	end
+	def time(move, game, sims) #ignores sims
+		@gtp.cmd "time_settings #{game} #{move} 1"
+	end
+	def params(param)
+		@gtp.cmd param if param.strip != ""
 	end
 	def play(side, move)
 		@gtp.cmd "play #{sides[side]} #{move}"
