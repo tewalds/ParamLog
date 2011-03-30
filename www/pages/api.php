@@ -135,6 +135,9 @@ function getwork($data, $user){
 		ORDER BY priority ASC, RAND()",
 			$u, $u, $u, $u, $u, $u, $u, $u, $u, $u)->fetchrow();
 
+	if(!$row)
+		return echo_json(array('error' => "No work"));
+
 	settype($row['timeid'],   'int');
 	settype($row['timemove'], 'float');
 	settype($row['timegame'], 'float');
@@ -143,9 +146,7 @@ function getwork($data, $user){
 	settype($row['p1id'],     'int');
 	settype($row['p2id'],     'int');
 
-	echo json($row);
-
-	return false;
+	return echo_json($row);
 }
 
 function lookup_game_id($data, $user){
