@@ -8,20 +8,23 @@
 
 	$parallel = 1;
 	$url = "http://paramlog.ewalds.ca";
-	$apikey = "1bab1eae9a58b147de6f7518c6644a38"
-	$benchplayer = Castro
-	$referee = Castro
+	$apikey = ""
+	$benchplayer = Player
+	$referee = NullPlayer
 	$maxmoves = 1000
+	$finishmoves = ['resign', 'none', 'unknown']
 
 	while(ARGV.length > 0)
 		arg = ARGV.shift
 		case arg
-		when "-p", "--parallel"  then $parallel = ARGV.shift.to_i;
+		when "-p", "--parallel"  then $parallel = ARGV.shift.to_i
+		when "-c", "--config"    then require ARGV.shift
 		when "-h", "--help"      then
 			puts "Run a worker process that plays games between players that understand GTP"
 			puts "based on a database of players, baselines, sizes and times"
 			puts "Usage: #{$0} [<options>]"
 			puts "  -p --parallel   Number of games to run in parallel [#{$parallel}]"
+			puts "  -c --config     Include this config file"
 			puts "  -h --help       Print this help"
 			exit;
 		else
@@ -64,6 +67,8 @@ puts game.inspect
 		players[2].params(game['p2config'])
 		players[2].params(game['p2test'])
 
+		players.each{|p| p.start }
+
 		turn = 1;           #which player is making the move
 		side = rand(2) + 1; #which side is the player making the move for
 		i = 1;
@@ -96,7 +101,7 @@ puts game.inspect
 				log << entry
 
 				m = entry['position']
-				break if m == "resign" || m == "none" || m == "unknown" || i >= $maxmoves
+				break if $finishmoves.index(m.downcase) || i >= $maxmoves
 
 				#pass the move to the other player
 				players[3-turn].play(side, move)
