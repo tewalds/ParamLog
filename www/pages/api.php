@@ -122,6 +122,8 @@ function getwork($data, $user){
 			p2prog.id = p2group.parent AND
 			p2group.id = p2test.parent AND
 
+			p1prog.id = p2prog.id AND
+
 			p1prog.weight > 0 AND
 			p1base.weight > 0 AND
 			p2prog.weight > 0 AND
