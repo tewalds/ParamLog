@@ -88,10 +88,10 @@ function showresults($input, $user){
 				<? } ?>
 				</select>
 				<br><br>
-				<?= makeCheckBox("scale", "Scale Graph") ?><br>
+				<?= makeCheckBox("scale", "Scale Graph") /* ?><br>
 				<?= makeCheckBox("errorbars", "Show Errorbars") ?><br>
 				<?= makeCheckBox("simpledata", "Show Simple Data") ?><br>
-				<?= makeCheckBox("data", "Show Data") ?><br>
+				<?= makeCheckBox("data", "Show Data") */?><br>
 				<br>
 				<input id='submit' type='submit' value="Show Graph!"> <?= $numgames ?> games logged
 			</td>
@@ -106,7 +106,7 @@ function showresults($input, $user){
 		</tr>
 	</form></table>
 
-<div id="chartdiv" style="height:500px;width:800px; "></div>
+<div id="chartdiv" style="height:500px;width:900px; "></div>
 
 <script>
 $.jqplot.config.enablePlugins = true;
