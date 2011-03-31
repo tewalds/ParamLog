@@ -11,6 +11,7 @@
 	$apikey = ""
 	$benchplayer = Player
 	$referee = NullPlayer
+	$refeverymove = false
 	$maxmoves = 1000
 	$finishmoves = ['resign', 'none', 'unknown']
 
@@ -20,7 +21,7 @@
 		when "-p", "--parallel"  then $parallel = ARGV.shift.to_i
 		when "-c", "--config"    then require ARGV.shift
 		when "-h", "--help"      then
-			puts "Run a worker process that plays games between players that understand GTP"
+			puts "Run a worker process that plays games between players"
 			puts "based on a database of players, baselines, sizes and times"
 			puts "Usage: #{$0} [<options>]"
 			puts "  -p --parallel   Number of games to run in parallel [#{$parallel}]"
@@ -37,9 +38,9 @@
 require 'net/http'
 require 'json'
 
-puts "benchmarking..."
+log "benchmarking..."
 time_factor = scaletime($benchplayer.benchtime){ $benchplayer.benchmark }
-puts "time_factor: " + time_factor.inspect
+log "time_factor: " + time_factor.inspect
 
 
 n = 0;
@@ -49,7 +50,7 @@ loop_fork($parallel) {
 	begin
 		game = JSON.parse(Net::HTTP.get(URI.parse("#{$url}/api/getwork?apikey=#{$apikey}")));
 
-puts game.inspect
+		log "New game, params: " + game.inspect
 
 		raise game['error'] if(game['error'])
 
@@ -75,7 +76,7 @@ puts game.inspect
 		side = rand(2) + 1; #which side is the player making the move for
 		i = 1;
 		move = nil;
-		log = []
+		gamelog = []
 		passes = 0;
 		moveresult = {"movenum" => 0, "position" => "", "side" => 0, "value" => 0, "outcome" => 0, "timetaken" => 0, "work" => 0, "comment" => ""}
 		totaltime = timer {
@@ -83,7 +84,7 @@ puts game.inspect
 				$0 = "Game #{n} move #{i}, size #{game['sizeparam']}"
 
 				#ask for a move
-				print "genmove #{side}: ";
+				log "Game #{n} move #{i}, size #{game['sizeparam']}: genmove #{side}";
 				time = timer {
 					move = players[turn].genmove(side)
 				}
@@ -100,12 +101,13 @@ puts game.inspect
 					raise "Invalid move, must define 'position' value" if !entry['position'] || entry['position'] == ''
 				end
 
-				puts entry['position']
-				log << entry
+				log "Game #{n} move #{i}, size #{game['sizeparam']}: play #{side} #{entry['position']}";
+				gamelog << entry
 
 				m = entry['position']
+				outcomeref = ($refeverymove ? players[0].winner : 0)
 				passes = (m.downcase == 'pass' ? passes + 1 : 0)
-				break if $finishmoves.index(m.downcase) || i >= $maxmoves || passes >= 2
+				break if $finishmoves.index(m.downcase) || i >= $maxmoves || passes >= 2 || outcomeref != 0
 
 				#pass the move to the other player
 				players[3-turn].play(side, move)
@@ -140,7 +142,7 @@ puts game.inspect
 		savegame = JSON.parse(res.body)
 
 		#save the moves
-		log.each{|entry|
+		gamelog.each{|entry|
 			entry.merge!({ "apikey"  => $apikey, "gameid" => savegame['id'] })
 			Net::HTTP.post_form(URI.parse("#{$url}/api/addmove"), entry);
 		}

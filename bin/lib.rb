@@ -33,6 +33,28 @@ def scaletime(expected, &block)
 	return benchtime / expected
 end
 
+class String
+	def red
+		"\e[31m#{self}\e[0m"
+	end
+	def red_back
+		"\e[41m#{self}\e[0m"
+	end
+	def green
+		"\e[32m#{self}\e[0m"
+	ends
+	def blue
+		"\e[34m#{self}\e[0m"
+	end
+	def yellow
+		"\e[33m#{self}\e[0m"
+	end
+end
+
+def log(msg)
+	puts((('[' + Time::now.strftime('%d-%m-%y %H:%M:%S') + '] ').yellow) + msg)
+end
+
 class Float
 	def round(digits = 0)
 		if(digits > 0)
