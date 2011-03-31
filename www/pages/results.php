@@ -66,8 +66,8 @@ function showresults($input, $user){
 				</select>
 			</td>
 			<td valign="top" colspan="2">
-				Baselines:<br>
-				<select name="baselines[]" multiple="multiple" style='width: 500px'>
+				Baselines: <a class="select_all" ref="baselines" href="#">All</a> | <a class="select_none" ref="baselines" href="#">None</a><br>
+				<select id="baselines" name="baselines[]" multiple="multiple" style='width: 500px'>
 				<? foreach($programs as $pid){
 					$player = $players[$pid]; ?>
 					<option class="program" value="<?= $pid ?>" disabled='disabled'><?= h($player['name']) ?> (<?= h($player['params']) ?>)</option>
@@ -81,8 +81,8 @@ function showresults($input, $user){
 		</tr>
 		<tr>
 			<td valign="top">
-				Time Limit:<br>
-				<select name="times[]" multiple="multiple" style='width: 300px'>
+				Time Limit: <a class="select_all" ref="times" href="#">All</a> | <a class="select_none" ref="times" href="#">None</a><br>
+				<select id="times" name="times[]" multiple="multiple" style='width: 300px'>
 				<? foreach($times as $time){ ?>
 					<option value="<?= $time['id'] ?>"><?= h($time['name']) ?> (<?= h($time['move']) . " " . h($time['game']) . " " . h($time['sims']) ?>)</option>
 				<? } ?>
@@ -96,8 +96,8 @@ function showresults($input, $user){
 				<input id='submit' type='submit' value="Show Graph!"> <?= $numgames ?> games logged
 			</td>
 			<td valign="top">
-				Board Sizes:<br>
-				<select name="sizes[]" multiple="multiple" style='width: 195px'>
+				Board Sizes: <a class="select_all" ref="sizes" href="#">All</a> | <a class="select_none" ref="sizes" href="#">None</a><br>
+				<select id="sizes" name="sizes[]" multiple="multiple" style='width: 195px'>
 				<? foreach($sizes as $time){ ?>
 					<option value="<?= $time['id'] ?>"><?= h($time['name']) ?> (<?= h($time['size']) ?>)</option>
 				<? } ?>
@@ -111,23 +111,30 @@ function showresults($input, $user){
 <script>
 $.jqplot.config.enablePlugins = true;
 
-$('form').submit(function(e){
-	e.preventDefault();
+$(function(){
+	$('form').submit(function(e){
+		e.preventDefault();
 
-	$.get("/results/data", $(this).serialize(), function(data){
-		if(data.error){
-			alert(data.error);
-		}else{
-//			alert(data);
-			data.options.axes.xaxis.renderer = $.jqplot.CategoryAxisRenderer;
+		$.get("/results/data", $(this).serialize(), function(data){
+			if(data.error){
+				alert(data.error);
+			}else{
+				data.options.axes.xaxis.renderer = $.jqplot.CategoryAxisRenderer;
+				$('#chartdiv').empty();
+				$.jqplot('chartdiv', data.data, data.options);
+			}
+		}, 'json');
+	});
 
-			$('#chartdiv').empty();
-			$.jqplot('chartdiv', data.data, data.options);
-		}
-	}, 'json');
-
+	$('a.select_all').click(function(e){
+		e.preventDefault();
+		$("#" + $(this).attr('ref')).children().attr('selected', 'selected');
+	});
+	$('a.select_none').click(function(e){
+		e.preventDefault();
+		$("#" + $(this).attr('ref')).children().attr('selected', '');
+	});
 });
-
 </script>
 
 <?
