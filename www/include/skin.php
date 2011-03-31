@@ -9,7 +9,7 @@ function skin($user, $body){
 		$menu['Games'] = "/games";
 		$menu['Results'] = "/results";
 		$menu['Players'] = "/players";
-		$menu['Recent'] = "/results/recent";
+		$menu['Recent'] = "/recent";
 		$menu['Logout'] = "/logout";
 	}
 ?>
