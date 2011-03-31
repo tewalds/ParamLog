@@ -153,11 +153,28 @@ function getdata($input, $user){
 		return json_error("You must select options from all categories to see any results!");
 	}
 
+
+	$players = $db->pquery("SELECT id, type, parent, name FROM players WHERE userid = ?", $user->userid)->fetchrowset('id');
+
+	$testcases = array();
+	foreach($players as $p){
+		if($p['type'] == P_TESTCASE){
+			undefset($testcases[$p['parent']], array());
+			$testcases[$p['parent']][] = $p['id'];
+		}
+	}
+
+	foreach($input['players'] as $k => $p){
+		if($players[$p]['type'] == P_TESTGROUP){
+			unset($input['players'][$k]);
+			foreach($testcases[$p] as $t)
+				$input['players'][] = $t;
+		}
+	}
+
 	$ids = array_merge($input['players'], $input['baselines']);
 	$baselineids = array_combine($input['baselines'], $input['baselines']);
 	$playerids = array_combine($input['players'], $input['players']);
-
-	$players = $db->pquery("SELECT id, type, name FROM players WHERE userid = ? && id IN ?", $user->userid, $ids)->fetchrowset('id');
 
 	$res = $db->pquery("SELECT * FROM results WHERE userid = ? && player1 IN ? && player2 IN ? && time IN ? && size IN ?",
 			$user->userid, $ids, $ids, $input['times'], $input['sizes']);
