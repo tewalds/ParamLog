@@ -76,6 +76,7 @@ puts game.inspect
 		i = 1;
 		move = nil;
 		log = []
+		passes = 0;
 		moveresult = {"movenum" => 0, "position" => "", "side" => 0, "value" => 0, "outcome" => 0, "timetaken" => 0, "work" => 0, "comment" => ""}
 		totaltime = timer {
 			loop{
@@ -103,7 +104,8 @@ puts game.inspect
 				log << entry
 
 				m = entry['position']
-				break if $finishmoves.index(m.downcase) || i >= $maxmoves
+				passes = (m.downcase == 'pass' ? passes + 1 : 0)
+				break if $finishmoves.index(m.downcase) || i >= $maxmoves || passes >= 2
 
 				#pass the move to the other player
 				players[3-turn].play(side, move)
