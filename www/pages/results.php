@@ -128,7 +128,7 @@ $(function(){
 
 	$('a.select_all').click(function(e){
 		e.preventDefault();
-		$("#" + $(this).attr('ref')).children().attr('selected', 'selected');
+		$("#" + $(this).attr('ref')).children("[disabled=false]").attr('selected', 'selected');
 	});
 	$('a.select_none').click(function(e){
 		e.preventDefault();
