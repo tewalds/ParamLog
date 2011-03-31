@@ -25,12 +25,12 @@ class Gambler < GTPPlayer
 		@params += param + "\r\n"
 	end
 	def start
-		@filename = rand 1000000000
+		@filename = "/tmp/gambler.#{rand 1000000000}.ini"
 		config = File.open("#{path}/gambler.ini"){|f| f.read }
 		config += "\r\n" + @params
-		File.open("/tmp/gambler.#{@filename}.ini", "w"){|f| f.write config }
+		File.open(@filename, "w"){|f| f.write config }
 
-		cmd = "#{path}/#{exec} /tmp/gambler.#{@filename}"
+		cmd = "#{path}/#{exec} #{@filename[0..-5]}"
 		puts "> #{cmd}"
 		@gtp = GTPClient.new(cmd, "\r\n")
 		@gtp.cmd "boardsize #{@boardsize}"
@@ -39,7 +39,7 @@ class Gambler < GTPPlayer
 	def quit
 		@gtp.cmd "quit"
 		@gtp.close
-		`rm -f /tmp/gambler.#{@filename}.ini`
+		File.delete(@filename) if File.exists?(@filename)
 	end
 	def winner
 		return 0
