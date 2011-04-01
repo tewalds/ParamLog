@@ -211,8 +211,8 @@ function getdata($input, $user){
 	foreach($data as $p => $data2){
 		foreach($data2 as $s => $row){
 			$row['total'] = $row['wins'] + $row['loss'] + $row['ties'];
-			$row['rate']  = ($row['wins'] + $row['ties']/2.0)/$row['total'];
-			$row['err']   = 2.0*sqrt($row['rate']*(1-$row['rate'])/$row['total']);
+			$row['rate']  = ($row['total'] > 0 ? ($row['wins'] + $row['ties']/2.0)/$row['total'] : 0);
+			$row['err']   = ($row['total'] > 0 ? 2.0*sqrt($row['rate']*(1-$row['rate'])/$row['total']) : 0);
 			$row['lb']    = max(0, $row['rate'] - $row['err']);
 			$row['ub']    = min(1, $row['rate'] + $row['err']);
 			$data[$p][$s] = $row;
