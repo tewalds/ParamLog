@@ -42,7 +42,7 @@ class String
 	end
 	def green
 		"\e[32m#{self}\e[0m"
-	ends
+	end
 	def blue
 		"\e[34m#{self}\e[0m"
 	end
