@@ -11,9 +11,11 @@ class GTPClient
 		@sep = newline + newline
 	end
 	def cmd(c)
-		return "" if c.strip == ""
+		return [true, ""] if c.strip == ""
 		@io.puts c.strip
-		return @io.gets(@sep)
+		res = @io.gets(@sep).strip.split(' ', 2)
+		res[0] = (res[0] == '=')
+		return res
 	end
 	def close
 		@io.close

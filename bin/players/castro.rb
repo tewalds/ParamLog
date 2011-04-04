@@ -25,7 +25,7 @@ class Castro < GTPPlayer
 		@gtp.cmd "player_params #{param}"
 	end
 	def winner
-		return sides.index(@gtp.cmd("havannah_winner")[2..-1].strip)
+		return sides.index(@gtp.cmd("havannah_winner")[1])
 	end
 end
 

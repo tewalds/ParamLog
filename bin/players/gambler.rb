@@ -43,7 +43,6 @@ class Gambler < GTPPlayer
 	end
 	def winner
 		return 0
-#		return sides.index(@gtp.cmd("havannah_winner")[2..-1].strip)
 	end
 end
 
