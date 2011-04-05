@@ -77,7 +77,7 @@ loop_fork($parallel) {
 		i = 1;
 		move = nil;
 		gamelog = []
-		passes = 0;
+		passes = 0; #game is over if there are two pass moves in a row
 		moveresult = {"movenum" => 0, "position" => "", "side" => 0, "value" => 0, "outcome" => 0, "timetaken" => 0, "work" => 0, "comment" => ""}
 		totaltime = timer {
 			loop{
@@ -91,7 +91,7 @@ loop_fork($parallel) {
 
 				entry = moveresult.dup
 				entry['movenum']   = i
-				entry['side']      = side
+				entry['side']      = turn
 				entry['timetaken'] = time
 
 				if(move.class == String)
@@ -105,13 +105,18 @@ loop_fork($parallel) {
 				gamelog << entry
 
 				m = entry['position']
-				outcomeref = ($refeverymove ? players[0].winner : 0)
+
+				#game over if one player resigns or both pass in succession
 				passes = (m.downcase == 'pass' ? passes + 1 : 0)
-				break if $finishmoves.index(m.downcase) || i >= $maxmoves || passes >= 2 || outcomeref != 0
+				break if $finishmoves.index(m.downcase) || passes >= 2
 
 				#pass the move to the other player
 				players[3-turn].play(side, move)
 				players[0].play(side, move)
+
+				#game over if the ref says so or pass the move limit
+				outcomeref = ($refeverymove ? players[0].winner : 0)
+				break if outcomeref != 0 || i >= $maxmoves
 
 				i += 1;
 				turn = 3-turn;
@@ -119,9 +124,10 @@ loop_fork($parallel) {
 			}
 		}
 
-		outcomeref = players[0].winner
-		outcome1   = players[1].winner
-		outcome2   = players[2].winner
+		outcome = players.map{|p|
+			o = p.winner
+			(turn != side && (o == 1 || o == 2) ? 3 - o : o)
+		}
 
 		players.each{|p|
 			p.quit
@@ -134,9 +140,9 @@ loop_fork($parallel) {
 			"player2" => game['p2id'],
 			"size"    => game['sizeid'],
 			"time"    => game['timeid'],
-			"outcome1" => outcome1,
-			"outcome2" => outcome2,
-			"outcomeref" => outcomeref,
+			"outcome1" => outcome[1],
+			"outcome2" => outcome[2],
+			"outcomeref" => outcome[0],
 		}
 		res = Net::HTTP.post_form(URI.parse("#{$url}/api/savegame"), result);
 		savegame = JSON.parse(res.body)
@@ -154,7 +160,7 @@ loop_fork($parallel) {
 			"player2" => game['p2id'],
 			"size"    => game['sizeid'],
 			"time"    => game['timeid'],
-			"outcome" => outcomeref || (outcome1 == outcome2 ? outcome1 : 0), #0 is unknown, 1 is p1, 2 is p2, 3 is draw
+			"outcome" => (outcome[0] != 0 ? outcome[0] : (outcome[1] == outcome[2] ? outcome[1] : 0)), #0 is unknown, 1 is p1, 2 is p2, 3 is draw
 		}
 		if(result['outcome'] != 0)
 			Net::HTTP.post_form(URI.parse("#{$url}/api/saveresult"), result);
