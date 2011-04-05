@@ -51,7 +51,7 @@ class Player
 		return {:move => "move", :value => "float", :outcome => "solved outcome", :work => "num simulations", :comment => "" }
 	end
 
-	#return the winner, one of 0 for draw, 1,2 for players and 3 for draw
+	#return the winner, one of 0 for unknown, 1,2 for players and 3 for draw
 	def winner
 		raise "Unimplemented winner method"
 		return 0
