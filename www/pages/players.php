@@ -55,6 +55,7 @@ jQuery.fn.editbox = function(options) {
 	return this.each(function() {
 		var value = $(this).html();
 		var input = $('<input>').val(value);
+		input.width(options.width || "100%");
 		$.each(options, function(k,v){
 			input.attr(k, v);
 		});
@@ -70,12 +71,29 @@ jQuery.fn.input_obj = function(ret) {
 };
 
 
+function buildrow(data){
+	var str = '';
+	str += '<tr class="l">';
+	str += '<td>';
+	if(data.id)     str += '<input type="hidden" name="id" value="' + data.id + '">';
+	if(data.parent) str += '<input type="hidden" name="parent" value="' + data.parent + '">';
+	str += '</td>';
+	str += '<td class="' + (data.nameclass || '') + '">' + (data.name || '') + '</td>';
+	str += '<td>' + (data.params || '') + '</td>';
+	str += '<td>' + (data.weight || '') + '</td>';
+	str += '<td>' + (data.links || '') + '</td>';
+	str += '</tr>';
+
+	return $(str);
+}
+
 $('a.newhuman').live('click', function(e){
 	e.preventDefault();
 
-	var tr = $('<tr class="l"><td></td>' +
-		'<td><input name="name"></td><td></td><td></td>' +
-		'<td><a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a></td></tr>');
+	var tr = buildrow( { links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>' });
+	var tds = tr.children();
+	$(tds[1]).editbox({name: "name"});
+
 	tr.find('a.save').click(function(e){
 		e.preventDefault();
 		var input = tr.input_obj({type: <?= P_PERSON ?> });
@@ -83,9 +101,8 @@ $('a.newhuman').live('click', function(e){
 			if(data.error){
 				alert(data.error);
 			}else{
-				tr.replaceWith('<tr class="l"><td><input type="hidden" name="id" value="' + data.id + '"></td>' +
-					'<td>' + data.name + '</td><td></td><td></td>' +
-					'<td><a class="edithuman" href="#">Edit</a></td></tr>');
+				data.links = '<a class="edithuman" href="#">Edit</a>';
+				tr.replaceWith(buildrow(data));
 			}
 		}, 'json');
 	});
@@ -129,12 +146,12 @@ $('a.edithuman').live('click', function(e){
 $('a.newprogram').live('click', function(e){
 	e.preventDefault();
 
-	var tr = $('<tr class="l"><td></td>' +
-		'<td><input name="name"></td>' +
-		'<td><input name="params"></td>' +
-		'<td><input name="weight" size="3"></td>' +
-		'<td><a class="save" href="#">Save</a> ' +
-		'<a class="cancel" href="#">Cancel</a></td></tr>');
+	var tr = buildrow( { links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>' });
+	var tds = tr.children();
+	$(tds[1]).editbox({name: "name"});
+	$(tds[2]).editbox({name: "params"});
+	$(tds[3]).editbox({name: "weight", value: 1, width: 80});
+
 	tr.find('a.save').click(function(e){
 		e.preventDefault();
 		var input = tr.input_obj({type: <?= P_PROGRAM ?> });
@@ -169,7 +186,7 @@ $('a.editprogram').live('click', function(e){
 
 	$(tds[1]).editbox({name: "name"});
 	$(tds[2]).editbox({name: "params"});
-	$(tds[3]).editbox({name: "weight", size:3});
+	$(tds[3]).editbox({name: "weight"});
 
 	var links = $('<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>');
 	links.filter("a.save").click(function(e){
@@ -196,12 +213,12 @@ $('a.editprogram').live('click', function(e){
 $('a.newbaseline').live('click', function(e){
 	e.preventDefault();
 
-	var tr = $('<tr class="l"><td></td>' +
-		'<td class="spacer"><input name="name"></td>' +
-		'<td><input name="params"></td>' +
-		'<td><input name="weight" size="3"></td>' +
-		'<td><a class="save" href="#">Save</a> ' +
-		'<a class="cancel" href="#">Cancel</a></td></tr>');
+	var tr = buildrow( { links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>' });
+	var tds = tr.children();
+	$(tds[1]).editbox({name: "name"});
+	$(tds[2]).editbox({name: "params"});
+	$(tds[3]).editbox({name: "weight", value: 1, width: 80});
+
 	var parent = $(this).attr('parent');
 	tr.find('a.save').click(function(e){
 		e.preventDefault();
@@ -210,11 +227,7 @@ $('a.newbaseline').live('click', function(e){
 			if(data.error){
 				alert(data.error);
 			}else{
-				tr.replaceWith('<tr class="l"><td><input type="hidden" name="id" value="' + data.id + '">' +
-					'<input type="hidden" name="parent" value="' + data.parent + '"></td>' +
-					'<td class="spacer">' + data.name + '</td><td>' + data.params + '</td><td>' + data.weight + '</td>' +
-					'<td><a class="editbaseline" href="#">Edit</a></td></tr>'
-					);
+				tr.replaceWith(buildrow($.extend(data, { nameclass: 'spacer', links : '<a class="editbaseline" href="#">Edit</a>' })));
 			}
 		}, 'json');
 	});
@@ -235,7 +248,7 @@ $('a.editbaseline').live('click', function(e){
 
 	$(tds[1]).editbox({name: "name"});
 	$(tds[2]).editbox({name: "params"});
-	$(tds[3]).editbox({name: "weight", size:3});
+	$(tds[3]).editbox({name: "weight"});
 
 	var links = $('<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>');
 	links.filter("a.save").click(function(e){
@@ -262,12 +275,12 @@ $('a.editbaseline').live('click', function(e){
 $('a.newtestgroup').live('click', function(e){
 	e.preventDefault();
 
-	var tr = $('<tr class="l"><td></td>' +
-		'<td class="spacer"><input name="name"></td>' +
-		'<td></td>' +
-		'<td><input name="weight" size="3"></td>' +
-		'<td><a class="save" href="#">Save</a> ' +
-		'<a class="cancel" href="#">Cancel</a></td></tr>');
+	var tr = buildrow( { nameclass : 'spacer', links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>' });
+	var tds = tr.children();
+	$(tds[1]).editbox({name: "name"});
+//	$(tds[2]).editbox({name: "params"});
+	$(tds[3]).editbox({name: "weight", value: 1, width: 80});
+
 	var parent = $(this).attr('parent');
 	tr.find('a.save').click(function(e){
 		e.preventDefault();
@@ -276,12 +289,7 @@ $('a.newtestgroup').live('click', function(e){
 			if(data.error){
 				alert(data.error);
 			}else{
-				tr.replaceWith('<tr class="l"><td><input type="hidden" name="id" value="' + data.id + '">' +
-					'<input type="hidden" name="parent" value="' + data.parent + '"></td>' +
-					'<td class="spacer">' + data.name + '</td><td></td><td>' + data.weight + '</td>' +
-					'<td><a class="edittestgroup" href="#">Edit</a> ' +
-					'<a class="newtestcase" href="#" parent="' + data.id + '">New Value</a></td></tr>'
-					);
+				tr.replaceWith(buildrow($.extend(data, { nameclass: 'spacer', links : '<a class="newtestcase" href="#" parent="' + data.id + '">New Value</a>' })));
 			}
 		}, 'json');
 	});
@@ -300,7 +308,7 @@ $('a.edittestgroup').live('click', function(e){
 	tds.save();
 
 	$(tds[1]).editbox({name: "name"});
-	$(tds[3]).editbox({name: "weight", size:3});
+	$(tds[3]).editbox({name: "weight"});
 
 	var links = $('<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>');
 	links.filter("a.save").click(function(e){
@@ -326,12 +334,12 @@ $('a.edittestgroup').live('click', function(e){
 $('a.newtestcase').live('click', function(e){
 	e.preventDefault();
 
-	var tr = $('<tr class="l"><td></td>' +
-		'<td class="spacer"><input name="name"></td>' +
-		'<td><input name="params"></td>' +
-		'<td><input name="weight" size="3"></td>' +
-		'<td><a class="save" href="#">Save</a> ' +
-		'<a class="cancel" href="#">Cancel</a></td></tr>');
+	var tr = buildrow( { nameclass: 'spacer2', links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>' });
+	var tds = tr.children();
+	$(tds[1]).editbox({name: "name"});
+	$(tds[2]).editbox({name: "params"});
+	$(tds[3]).editbox({name: "weight", value: 1, width: 80});
+
 	var parent = $(this).attr('parent');
 	tr.find('a.save').click(function(e){
 		e.preventDefault();
@@ -340,11 +348,7 @@ $('a.newtestcase').live('click', function(e){
 			if(data.error){
 				alert(data.error);
 			}else{
-				tr.replaceWith('<tr class="l"><td><input type="hidden" name="id" value="' + data.id + '">' +
-					'<input type="hidden" name="parent" value="' + data.parent + '"></td>' +
-					'<td class="spacer2">' + data.name + '</td><td>' + data.params + '</td><td>' + data.weight + '</td>' +
-					'<td><a class="edittestcase" href="#">Edit</a></td></tr>'
-					);
+				tr.replaceWith(buildrow($.extend(data, { nameclass: 'spacer2', links : '<a class="edittestcase" href="#">Edit</a>' })));
 			}
 		}, 'json');
 	});
@@ -364,7 +368,7 @@ $('a.edittestcase').live('click', function(e){
 
 	$(tds[1]).editbox({name: "name"});
 	$(tds[2]).editbox({name: "params"});
-	$(tds[3]).editbox({name: "weight", size:3});
+	$(tds[3]).editbox({name: "weight"});
 
 	var links = $('<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>');
 	links.filter("a.save").click(function(e){
@@ -393,13 +397,13 @@ $('a.edittestcase').live('click', function(e){
 
 Api Key: <?= $user->apikey ?><br>
 
-	<table width="750">
+	<table width="100%">
 	<tr>
 		<th></td>
 		<th>Name</td>
 		<th>Param</td>
-		<th>Weight</td>
-		<th></td>
+		<th width="80px">Weight</td>
+		<th width="140px"></td>
 	</tr>
 	<tr class="l2" id="humans"><td></td>
 		<td colspan="3"><b>Humans:</b></td>
