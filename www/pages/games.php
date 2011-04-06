@@ -1,6 +1,6 @@
 <?
 
-function getrecent($input, $user){
+function getgames($input, $user){
 	global $db;
 
 	$data = $db->pquery("SELECT * FROM games WHERE userid = ? && timestamp > UNIX_TIMESTAMP()-3600 ORDER by timestamp", $user->userid)->fetchrowset();
@@ -23,7 +23,7 @@ function getrecent($input, $user){
 	</tr>
 
 <?	foreach($data as $row){ ?>
-		<tr>
+		<tr class="l">
 			<td><?= $players[$players[$row['player1']]['parent']]['name'] . " " . $players[$row['player1']]['name'] ?></td>
 			<td><?= $players[$players[$row['player2']]['parent']]['name'] . " " . $players[$row['player2']]['name'] ?></td>
 			<td><?= $sizes[$row['size']] ?></td>

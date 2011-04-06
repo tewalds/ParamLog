@@ -37,7 +37,8 @@ $router->add("POST","/resetpassword", "account.php", "resetpassword", 'anon',  a
 $router->add("GET", "/results",        "results.php", "showresults", 'user', null);
 $router->add("GET", "/results/data",   "results.php", "getdata",     'user', array("players" => "array", "baselines" => "array", "times" => "array", "sizes" => "array", "scale" => "bool"));
 $router->add("GET", "/results/hosts",  "results.php", "gethosts",    'user', null);
-$router->add("GET", "/recent",         "recent.php", "getrecent",    'user', null);
+
+$router->add("GET", "/games",          "games.php", "getgames",    'user', null);
 
 $router->add("GET",  "/players",        "players.php", "players_list", 'user', null);
 $router->add("POST", "/players/save",   "players.php", "players_save", 'user', array("id" => "int", "type" => "int", "parent" => "int", "name" => "string", "params" => "string", "weight" => "int"));
