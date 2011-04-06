@@ -57,7 +57,7 @@ function swap(& $a, & $b){
 }
 
 function cmpname($a, $b){
-	return strnatcmp($a['name'], $b['name']);
+	return strnatcasecmp($a['name'], $b['name']);
 }
 
 function redirect($loc){
