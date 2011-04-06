@@ -181,15 +181,20 @@ function getdata($input, $user){
 
 	$rawdata = array();
 	while($line = $res->fetchrow()){
-		if(isset($baselineids[$line['player1']]) && isset($playerids[$line['player2']]))
+		if(isset($baselineids[$line['player1']]) && isset($playerids[$line['player2']])){
+			$line['name'] = $players[$line['player2']]['name'];
 			$rawdata[] = $line;
+		}
 
 		if(isset($baselineids[$line['player2']]) && isset($playerids[$line['player1']])){
 			swap($line['player1'], $line['player2']);
 			swap($line['p1wins'], $line['p2wins']);
+			$line['name'] = $players[$line['player2']]['name'];
 			$rawdata[] = $line;
 		}
 	}
+
+	usort($rawdata, 'namecmp');
 
 	$sizes = $db->pquery("SELECT id, name FROM sizes WHERE userid = ? && id IN ? ORDER BY name", $user->userid, $input['sizes'])->fetchfieldset();
 
@@ -280,5 +285,11 @@ function getdata($input, $user){
 
 	echo json(array('options' => $options, 'data'=> $output));
 	return false;
+}
+
+function namecmp($a, $b){
+    if($a['name'] == $b['name'])
+        return 0;
+    return ($a['name'] < $b['name'] ? -1 : 1);
 }
 
