@@ -56,6 +56,10 @@ function swap(& $a, & $b){
 	$b = $tmp;
 }
 
+function cmpname($a, $b){
+	return strnatcmp($a['name'], $b['name']);
+}
+
 function redirect($loc){
 	header("location: $loc");
 	echo "Redirecting to: <a href='" . htmlentities($loc) . "'>$loc</a>";

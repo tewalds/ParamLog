@@ -3,7 +3,8 @@
 function showresults($input, $user){
 	global $db;
 
-	$players = $db->pquery("SELECT * FROM players WHERE userid = ? ORDER BY name", $user->userid)->fetchrowset('id');
+	$players = $db->pquery("SELECT * FROM players WHERE userid = ?", $user->userid)->fetchrowset('id');
+	uasort($players, 'cmpname');
 
 	$persons    = array(); // [ids of persons]
 	$programs   = array(); // [ids of programs]
@@ -194,7 +195,7 @@ function getdata($input, $user){
 		}
 	}
 
-	usort($rawdata, 'namecmp');
+	usort($rawdata, 'cmpname');
 
 	$sizes = $db->pquery("SELECT id, name FROM sizes WHERE userid = ? && id IN ? ORDER BY name", $user->userid, $input['sizes'])->fetchfieldset();
 
@@ -285,11 +286,5 @@ function getdata($input, $user){
 
 	echo json(array('options' => $options, 'data'=> $output));
 	return false;
-}
-
-function namecmp($a, $b){
-    if($a['name'] == $b['name'])
-        return 0;
-    return ($a['name'] < $b['name'] ? -1 : 1);
 }
 

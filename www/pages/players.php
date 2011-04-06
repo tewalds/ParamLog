@@ -3,7 +3,8 @@
 function players_list($input, $user){
 	global $db;
 
-	$players = $db->pquery("SELECT * FROM players WHERE userid = ? ORDER BY name", $user->userid)->fetchrowset('id');
+	$players = $db->pquery("SELECT * FROM players WHERE userid = ?", $user->userid)->fetchrowset('id');
+	uasort($players, 'cmpname');
 
 	$persons    = array(); // [ids of persons]
 	$programs   = array(); // [ids of programs]
