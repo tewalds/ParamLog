@@ -72,8 +72,8 @@ loop_fork($parallel) {
 
 		players.each{|p| p.start }
 
-		turn = 1;           #which player is making the move
-		side = rand(2) + 1; #which side is the player making the move for
+		turn = rand(2) + 1; #which player is making the move
+		side = 1;           #which side is the player making the move for
 		i = 1;
 		move = nil;
 		gamelog = []
