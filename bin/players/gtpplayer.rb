@@ -24,6 +24,15 @@ class GTPPlayer < Player
 		@gtp.cmd "quit"
 		@gtp.close
 	end
+	def version
+		n = @gtp.cmd "name"
+		v = @gtp.cmd "version"
+
+		parts = []
+		parts << n[1] if n[0]
+		parts << v[1] if v[0]
+		return parts.join ' '
+	end
 	def boardsize(size)
 		@gtp.cmd "boardsize #{size}"
 	end
