@@ -21,13 +21,18 @@ class Castro < GTPPlayer
 #		@gtp.cmd "verbose 2"
 	end
 	def time(move, game, sims)
-		@gtp.cmd "time -m #{move} -g #{game} -r #{game} -i #{sims} -f 0"
+		r = @gtp.cmd "time -m #{move} -g #{game} -r #{game} -i #{sims} -f 0"
+		raise "GTP command failed: time -m #{move} -g #{game} -r #{game} -i #{sims} -f 0" if !r[0]
 	end
 	def params(param)
-		@gtp.cmd "player_params #{param}"
+		r = @gtp.cmd "player_params #{param}"
+		raise "GTP command failed: player_params #{param}" if !r[0]
 	end
 	def genmove(side)
-		res = @gtp.cmd("genmove #{sides[side]}")[1].split
+		r = @gtp.cmd("genmove #{sides[side]}")
+		raise "GTP command failed: genmove #{sides[side]}" if !r[0]
+
+		res = r[1].split
 
 		return res[0] if(res.length == 1)
 
