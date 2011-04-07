@@ -90,9 +90,9 @@ function showresults($input, $user){
 				</select>
 				<br><br>
 				<?= makeCheckBox("scale", "Scale Graph") /* ?><br>
-				<?= makeCheckBox("errorbars", "Show Errorbars") ?><br>
+				<?= makeCheckBox("errorbars", "Show Errorbars") */ ?><br>
 				<?= makeCheckBox("simpledata", "Show Simple Data") ?><br>
-				<?= makeCheckBox("data", "Show Data") */?><br>
+				<?= makeCheckBox("fulldata", "Show Full Data") ?><br>
 				<br>
 				<input id='submit' type='submit' value="Show Graph!"> <?= $numgames ?> games logged
 			</td>
@@ -107,7 +107,11 @@ function showresults($input, $user){
 		</tr>
 	</form></table>
 
-<div id="chartdiv" style="height:500px;width:900px; "></div>
+<div id="chart"></div>
+<br>
+<div id="shortdata"></div>
+<br>
+<div id="longdata"></div>
 
 <script>
 $.jqplot.config.enablePlugins = true;
@@ -121,8 +125,69 @@ $(function(){
 				alert(data.error);
 			}else{
 				data.options.axes.xaxis.renderer = $.jqplot.CategoryAxisRenderer;
-				$('#chartdiv').empty();
-				$.jqplot('chartdiv', data.data, data.options);
+				$('#chart').empty().css({height: 500, width: 900});
+				$.jqplot('chart', data.data, data.options);
+
+				$('#shortdata').empty();
+				if($('#simpledata')[0].checked){
+					var str = '<table width="800">';
+					str += '<tr>';
+					str += '<th rowspan="2">Player Name</th>';
+					str += '<th colspan="' + data.options.axes.xaxis.ticks.length + '">Board size</th>';
+					str += '<th rowspan="2">Avg</th>';
+					str += '</tr>';
+					str += '<tr>';
+					for(var i = 0; i < data.options.axes.xaxis.ticks.length; i++)
+						str += '<th>' + data.options.axes.xaxis.ticks[i] + '</th>';
+					str += '</tr>';
+
+					for(var i = 1; i < data.data.length; i++){
+						str += '<tr class="l">'
+						str += '<td>' + data.options.series[i].label + '</td>';
+						total = 0;
+						for(var j = 0; j < data.data[i].length; j++){
+							str += '<td align="right">' + data.data[i][j][1].toFixed(2) + '</td>';
+							total += data.data[i][j][1];
+						}
+						str += '<td align="right">' + (total/data.data[i].length).toFixed(2) + '</td>';
+						str += '</tr>';
+					}
+					str += "</table>";
+					$('#shortdata').html(str);
+				}
+
+				$('#longdata').empty();
+				if($('#fulldata')[0].checked){
+					var str = '<table width="800">';
+					str += '<tr>';
+					str += '<th rowspan="2">Player Name</th>';
+					str += '<th rowspan="2">Board Size</th>';
+					str += '<th colspan="3">Outcome</th>';
+					str += '<th colspan="4">Games</th>';
+					str += '</tr>';
+					str += '<tr>';
+					str += '<th>Win rate</th>';
+					str += '<th>Low</th>';
+					str += '<th>High</th>';
+					str += '<th>Wins</th>';
+					str += '<th>Losses</th>';
+					str += '<th>Ties</th>';
+					str += '<th>Total</th>';
+					str += '</tr>';
+
+					for(var i = 1; i < data.data.length; i++){
+						for(var j = 0; j < data.data[i].length; j++){
+							str += '<tr class="' + (j == 0 ? 'l2' : 'l') + '">'
+							str += '<td>' + (j == 0 ? data.options.series[i].label : '') + '</td>';
+							str += '<td>' + data.options.axes.xaxis.ticks[j] + '</td>';
+							for(var k = 1; k < data.data[i][j].length; k++)
+								str += '<td align="right">' + data.data[i][j][k].toFixed((k < 4 ? 2 : 0)) + '</td>';
+							str += '</tr>';
+						}
+					}
+					str += "</table>";
+					$('#longdata').html(str);
+				}
 			}
 		}, 'json');
 	});
