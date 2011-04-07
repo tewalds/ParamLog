@@ -111,8 +111,8 @@ loop_fork($parallel) {
 				break if $finishmoves.index(m.downcase) || passes >= 2
 
 				#pass the move to the other player
-				players[3-turn].play(side, move)
-				players[0].play(side, move)
+				players[3-turn].play(side, m)
+				players[0].play(side, m)
 
 				#game over if the ref says so or pass the move limit
 				outcomeref = ($refeverymove ? players[0].winner : 0)
