@@ -43,7 +43,7 @@ function showresults($input, $user){
 	$numgames = $db->pquery("SELECT count(*) FROM games WHERE userid = ?", $user->userid)->fetchfield();
 
 ?>
-	<table><form action=/results/data method=GET>
+	<table><form action=/games method=GET>
 		<tr>
 			<td valign="top" rowspan="2">
 				Players:<br>
@@ -94,7 +94,8 @@ function showresults($input, $user){
 				<?= makeCheckBox("simpledata", "Show Simple Data") ?><br>
 				<?= makeCheckBox("fulldata", "Show Full Data") ?><br>
 				<br>
-				<input id='submit' type='submit' value="Show Graph!"> <?= $numgames ?> games logged
+				<input id='showgraph' type='button' value="Show Graph!">
+				<input type='submit' value="Search Games">
 			</td>
 			<td valign="top">
 				Board Sizes: <a class="select_all" ref="sizes" href="#">All</a> | <a class="select_none" ref="sizes" href="#">None</a><br>
@@ -103,6 +104,8 @@ function showresults($input, $user){
 					<option value="<?= $time['id'] ?>"><?= h($time['name']) ?> (<?= h($time['size']) ?>)</option>
 				<? } ?>
 				</select>
+				<br><br>
+				<?= $numgames ?> games logged
 			</td>
 		</tr>
 	</form></table>
@@ -117,10 +120,10 @@ function showresults($input, $user){
 $.jqplot.config.enablePlugins = true;
 
 $(function(){
-	$('form').submit(function(e){
+	$('#showgraph').click(function(e){
 		e.preventDefault();
 
-		$.get("/results/data", $(this).serialize(), function(data){
+		$.get("/results/data", $('form').serialize(), function(data){
 			if(data.error){
 				alert(data.error);
 			}else{
@@ -213,11 +216,8 @@ function getdata($input, $user){
 	global $db;
 
 
-	if(empty($input['players']) || empty($input['baselines']) || empty($input['sizes']) || empty($input['times'])){
-		echo json(array('error' => "You must select options from all categories to see any results!", 'input' => $input));
-		return false;
+	if(empty($input['players']) || empty($input['baselines']) || empty($input['sizes']) || empty($input['times']))
 		return json_error("You must select options from all categories to see any results!");
-	}
 
 
 	$players = $db->pquery("SELECT id, type, parent, name FROM players WHERE userid = ?", $user->userid)->fetchrowset('id');

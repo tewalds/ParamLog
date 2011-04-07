@@ -3,9 +3,36 @@
 function getgames($input, $user){
 	global $db;
 
-	$data = $db->pquery("SELECT * FROM games WHERE userid = ? && timestamp > UNIX_TIMESTAMP()-3600 ORDER by timestamp", $user->userid)->fetchrowset();
+	$players = $db->pquery("SELECT id, type, parent, name FROM players WHERE userid = ?", $user->userid)->fetchrowset('id');
 
-	$players = $db->pquery("SELECT id, name, parent FROM players WHERE userid = ?", $user->userid)->fetchrowset('id');
+	$testcases = array();
+	foreach($players as $p){
+		if($p['type'] == P_TESTCASE){
+			undefset($testcases[$p['parent']], array());
+			$testcases[$p['parent']][] = $p['id'];
+		}
+	}
+
+	foreach($input['players'] as $k => $p){
+		if($players[$p]['type'] == P_TESTGROUP){
+			unset($input['players'][$k]);
+			foreach($testcases[$p] as $t)
+				$input['players'][] = $t;
+		}
+	}
+
+
+	if(empty($input['players']) && empty($input['baselines']) && empty($input['sizes']) && empty($input['times'])){
+		$data = $db->pquery("SELECT * FROM games WHERE userid = ? && timestamp > UNIX_TIMESTAMP()-3600 ORDER BY id", $user->userid)->fetchrowset();
+	}else if(empty($input['players']) || empty($input['baselines']) || empty($input['sizes']) || empty($input['times'])){
+		echo "You must select options from all categories to see any results!";
+		return true;
+	}else{
+		$ids = array_merge($input['players'], $input['baselines']);
+		$data = $db->pquery("SELECT * FROM games WHERE userid = ? && player1 IN ? && player2 IN ? && time IN ? && size IN ? ORDER BY id LIMIT 100",
+				$user->userid, $ids, $ids, $input['times'], $input['sizes'])->fetchrowset();
+	}
+
 	$times = $db->pquery("SELECT id, name FROM times WHERE userid = ?", $user->userid)->fetchfieldset();
 	$sizes = $db->pquery("SELECT id, name FROM sizes WHERE userid = ?", $user->userid)->fetchfieldset();
 
