@@ -63,6 +63,8 @@ function showgame($input, $user){
 	<tr class='l'><th>Outcome Player 1</th><td><?= $game['outcome1'] ?></td></tr>
 	<tr class='l'><th>Outcome Player 2</th><td><?= $game['outcome2'] ?></td></tr>
 	<tr class='l'><th>Outcome Referee</th><td><?= $game['outcomeref'] ?></td></tr>
+	<tr class='l'><th>Player 1 Version</th><td><?= $game['version1'] ?></td></tr>
+	<tr class='l'><th>Player 2 Version</th><td><?= $game['version2'] ?></td></tr>
 	<tr class='l'><th>Host</th><td><?= $game['host'] ?></td></tr>
 	<tr class='l'><th>Lookup name</th><td><?= $game['lookup'] ?></td></tr>
 	<tr class='l'><th>Move string</th><td><? foreach($moves as $move) echo $move['position'] . " "	?></td></tr>
