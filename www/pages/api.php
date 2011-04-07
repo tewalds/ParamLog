@@ -203,8 +203,8 @@ function add_move($data, $user){
 		$data['movenum'] = $game['nummoves']+1;
 
 	$id = $db->pquery("INSERT INTO moves SET userid = ?, gameid = ?, movenum = ?, position = ?, side = ?,
-		value = ?, outcome = ?, timetaken = ?, work = ?, comment = ?", $user->userid, $data['gameid'], $data['movenum'],
-		$data['position'], $data['side'], $data['value'], $data['outcome'], $data['timetaken'], $data['work'], $data['comment'])->insertid();
+		value = ?, outcome = ?, timetaken = ?, work = ?, nodes = ?, comment = ?", $user->userid, $data['gameid'], $data['movenum'],
+		$data['position'], $data['side'], $data['value'], $data['outcome'], $data['timetaken'], $data['work'], $data['nodes'], $data['comment'])->insertid();
 
 	$db->pquery("UPDATE games SET nummoves = nummoves + 1 WHERE userid = ? && id = ?", $user->userid, $data['gameid']);
 
