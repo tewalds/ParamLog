@@ -6,6 +6,7 @@ require 'players/player.rb'
 class NullPlayer < Player
 	def initialize; end
 	def quit; end
+	def version; ""; end
 	def boardsize(size); end
 	def time(move, game, sims); end
 	def params(param); end
