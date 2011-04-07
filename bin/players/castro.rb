@@ -17,12 +17,25 @@ class Castro < GTPPlayer
 	def initialize
 		super
 		@gtp.cmd "hguicoords"
+		@gtp.cmd "extended 1"
 	end
 	def time(move, game, sims)
 		@gtp.cmd "time -m #{move} -g #{game} -r #{game} -i #{sims} -f 0"
 	end
 	def params(param)
 		@gtp.cmd "player_params #{param}"
+	end
+	def genmove(side)
+		res = @gtp.cmd("genmove #{sides[side]}")[1].split
+
+		return res[0] if(res.length == 1)
+
+		#translate to this format of outcome
+		res[2] = res[2].to_i
+		res[2] = 3 if(res[2] == 0)
+		res[2] = 0 if(res[2] < 0)
+
+		return {"position" => res[0], "value" => res[1], "outcome" => res[2], "work" => res[3], "nodes" => res[4]}
 	end
 	def winner
 		return sides.index(@gtp.cmd("havannah_winner")[1])
