@@ -78,7 +78,7 @@ loop_fork($parallel) {
 		move = nil;
 		gamelog = []
 		passes = 0; #game is over if there are two pass moves in a row
-		moveresult = {"movenum" => 0, "position" => "", "side" => 0, "value" => 0, "outcome" => 0, "timetaken" => 0, "work" => 0, "comment" => ""}
+		moveresult = {"movenum" => 0, "position" => "", "side" => 0, "value" => 0, "outcome" => 0, "timetaken" => 0, "work" => 0, "nodes" => 0, "comment" => ""}
 		totaltime = timer {
 			loop{
 				$0 = "Game #{n} move #{i}, size #{game['sizeparam']}"
@@ -143,6 +143,7 @@ loop_fork($parallel) {
 			"outcome1" => outcome[1],
 			"outcome2" => outcome[2],
 			"outcomeref" => outcome[0],
+			"host" => `hostname`.strip
 		}
 		res = Net::HTTP.post_form(URI.parse("#{$url}/api/savegame"), result);
 		savegame = JSON.parse(res.body)
