@@ -48,7 +48,8 @@ class Player
 	def genmove(side)
 		raise "Unimplemented genmove method"
 		return "move"
-		return {:move => "move", :value => "float", :outcome => "solved outcome", :work => "num simulations", :comment => "" }
+		return {'move' => "move", 'value' => "float", 'outcome' => "solved outcome",
+			'work' => "num simulations", 'nodes' => "nodes expanded", 'comment' => "" }
 	end
 
 	#return the winner, one of 0 for unknown, 1,2 for players and 3 for draw
