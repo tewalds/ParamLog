@@ -101,6 +101,10 @@ loop_fork($parallel) {
 					raise "Invalid move, must define 'position' value" if !entry['position'] || entry['position'] == ''
 				end
 
+				o = entry['outcome'];
+				entry['outcome'] = (turn != side && (o == 1 || o == 2) ? 3 - o : o)
+
+
 				log "Game #{n} move #{i}, size #{game['sizeparam']}: play #{side} #{entry['position']}";
 				gamelog << entry
 
