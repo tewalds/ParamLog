@@ -46,7 +46,7 @@ $router->add("POST", "/players/save",   "players.php", "players_save", 'user', a
 
 $router->add("GET", "/api/getwork",     "api.php", "getwork",        'api', null);
 $router->add("GET", "/api/lookup",      "api.php", "lookup_game_id", 'api', array("lookup" => "string"));
-$router->add("POST","/api/savegame",    "api.php", "save_game",      'api', array("id" => "int", "player1" => "int", "player2" => "int", "size" => "int", "time" => "int", "lookup" => "str", "outcome1" => "int", "outcome2" => "int", "outcomeref" => "int", "host" => "str"));
+$router->add("POST","/api/savegame",    "api.php", "save_game",      'api', array("id" => "int", "player1" => "int", "player2" => "int", "size" => "int", "time" => "int", "lookup" => "str", "outcome1" => "int", "outcome2" => "int", "outcomeref" => "int", "version1" => "string", "version2" => "string", "host" => "str"));
 $router->add("POST","/api/addmove",     "api.php", "add_move",       'api', array("gameid" => "int", "movenum" => "int", "position" => "str", "side" => "int", "value" => "float", "outcome" => "int", "timetaken" => "float", "work" => "int", "nodes" => "string", "comment" => "str"));
 $router->add("POST","/api/saveresult",  "api.php", "save_result",    'api', array("player1" => "int", "player2" => "int", "size" => "int", "time" => "int", "outcome" => "int"));
 

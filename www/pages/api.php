@@ -180,9 +180,9 @@ function save_game($data, $user){
 			$data['host'] = gethostbyaddr($_SERVER["REMOTE_ADDR"]);
 
 		$data['id'] = $db->pquery("INSERT INTO games SET userid = ?, lookup = ?, player1 = ?, player2 = ?, size = ?, time = ?,
-			timestamp = ?, outcome1 = ?, outcome2 = ?, outcomeref = ?, host = ?",
-			$user->userid, $data['lookup'], $data['player1'], $data['player2'], $data['size'], $data['time'],
-			time(), $data['outcome1'], $data['outcome2'], $data['outcomeref'], $data['host'])->insertid();
+			timestamp = ?, outcome1 = ?, outcome2 = ?, outcomeref = ?, version1 = ?, version2 = ?, host = ?",
+			$user->userid, $data['lookup'], $data['player1'], $data['player2'], $data['size'], $data['time'], time(),
+			$data['outcome1'], $data['outcome2'], $data['outcomeref'], $data['version1'], $data['version2'], $data['host'])->insertid();
 	}
 	$row = $db->pquery("SELECT * FROM games WHERE userid = ? && id = ?", $user->userid, $data['id'])->fetchrow();
 	echo json(h($row));
