@@ -39,6 +39,7 @@ $router->add("GET", "/results/data",   "results.php", "getdata",     'user', arr
 $router->add("GET", "/results/hosts",  "results.php", "gethosts",    'user', null);
 
 $router->add("GET", "/games",          "games.php", "getgames",    'user', null);
+$router->add("GET", "/games/show",     "games.php", "showgame",    'user', array('id' => "int"));
 
 $router->add("GET",  "/players",        "players.php", "players_list", 'user', null);
 $router->add("POST", "/players/save",   "players.php", "players_save", 'user', array("id" => "int", "type" => "int", "parent" => "int", "name" => "string", "params" => "string", "weight" => "int"));
