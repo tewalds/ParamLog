@@ -14,6 +14,7 @@ class GTPClient
 		return [true, ""] if c.strip == ""
 		@io.puts c.strip
 		res = @io.gets(@sep).strip.split(' ', 2)
+#		puts "> #{c} ==> #{res.join ' '}"
 		res[0] = (res[0] == '=')
 		return res
 	end

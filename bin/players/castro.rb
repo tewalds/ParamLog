@@ -18,6 +18,7 @@ class Castro < GTPPlayer
 		super
 		@gtp.cmd "hguicoords"
 		@gtp.cmd "extended 1"
+#		@gtp.cmd "verbose 2"
 	end
 	def time(move, game, sims)
 		@gtp.cmd "time -m #{move} -g #{game} -r #{game} -i #{sims} -f 0"
