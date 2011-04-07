@@ -37,7 +37,7 @@ class GTPPlayer < Player
 		@gtp.cmd "play #{sides[side]} #{move}"
 	end
 	def genmove(side)
-		return @gtp.cmd("genmove #{sides[side]}")[1]
+		return @gtp.cmd("genmove #{sides[side]}")[1].split[0]
 	end
 end
 
