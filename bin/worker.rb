@@ -72,6 +72,8 @@ loop_fork($parallel) {
 
 		players.each{|p| p.start }
 
+		versions = players.map{|p| p.version}
+
 		turn = rand(2) + 1; #which player is making the move
 		side = 1;           #which side is the player making the move for
 		i = 1;
@@ -147,6 +149,8 @@ loop_fork($parallel) {
 			"outcome1" => outcome[1],
 			"outcome2" => outcome[2],
 			"outcomeref" => outcome[0],
+			"version1" => versions[1],
+			"version2" => versions[2],
 			"host" => `hostname`.strip
 		}
 		res = Net::HTTP.post_form(URI.parse("#{$url}/api/savegame"), result);
