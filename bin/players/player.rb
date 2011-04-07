@@ -20,6 +20,11 @@ class Player
 		raise "Unimplemented quit method"
 	end
 
+	#get the program name and version
+	def version
+		raise "Unimplemented version method"
+	end
+
 	#set the boardsize
 	def boardsize(size)
 		raise "Unimplemented boardsize method"
