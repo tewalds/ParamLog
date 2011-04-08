@@ -6,7 +6,7 @@ function skin($user, $body){
 	$menu = array();
 	$menu['Home'] = "/";
 	if($user->userid){
-		$menu['Games'] = "/games";
+		$menu['Recent Games'] = "/games";
 		$menu['Results'] = "/results";
 		$menu['Players'] = "/players";
 		$menu['Logout'] = "/logout";
