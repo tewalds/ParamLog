@@ -57,7 +57,8 @@ class Ataxx < Player
 
 		@c.cmd "i #{size}"
 
-		board = [['e']*size]*size
+		board = []
+		size.times{ board << ['e']*size }
 		board[0][0] = 'w'
 		board[0][size-1] = 'b'
 		board[size-1][0] = 'b'
