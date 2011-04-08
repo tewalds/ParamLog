@@ -72,7 +72,9 @@ class Ataxx < Player
 	end
 	def params(param)
 		return if param == ""
-		@c.cmd param
+		param.split("/").each{|p|
+			@c.cmd p.strip
+		}
 	end
 	def play(side, move)
 		ret = @c.cmd "m#{move}"
