@@ -140,7 +140,7 @@ function gensgf($input, $user){
 
 	header("Content-disposition: attachment; filename=\"$game[id].sgf\"");
 
-	echo "(;FF[4]GM[Havannah]SZ[" . $sizes[$game['size']] . "]";
+	echo "(;FF[4]SZ[" . $sizes[$game['size']] . "]";
 	echo "PW[$game[player1]:$game[version1]]PB[$game[player2]:$game[version2]]";
 	foreach($moves as $i => $move)
 		echo ";" . ($i % 2 == 0 ? 'W' : 'B') . "[$move[position]]";
