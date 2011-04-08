@@ -94,7 +94,7 @@ function showgame($input, $user){
 	<tr class='l'><th>Player 2 Version</th><td><?= $game['version2'] ?></td></tr>
 	<tr class='l'><th>Host</th><td><?= $game['host'] ?></td></tr>
 	<tr class='l'><th>Lookup name</th><td><?= $game['lookup'] ?></td></tr>
-	<tr class='l'><th>Move string</th><td><? foreach($moves as $move) echo $move['position'] . " "	?></td></tr>
+	<tr class='l'><th>Move string (<a href="/games/sgf?id=<?= $game['id'] ?>">sgf</a>)</th><td><? foreach($moves as $move) echo $move['position'] . " "	?></td></tr>
 </table>
 
 <table>
@@ -128,6 +128,25 @@ function showgame($input, $user){
 	return true;
 }
 
+function gensgf($input, $user){
+	global $db;
+
+	$game = $db->pquery("SELECT * FROM games WHERE userid = ? && id = ?", $user->userid, $input['id'])->fetchrow();
+	$moves = $db->pquery("SELECT * FROM moves WHERE userid = ? && gameid = ? ORDER BY movenum", $user->userid, $input['id'])->fetchrowset();
+
+//	$players = $db->pquery("SELECT id, name, parent FROM players WHERE userid = ?", $user->userid)->fetchrowset('id');
+	$sizes = $db->pquery("SELECT id, size FROM sizes WHERE userid = ?", $user->userid)->fetchfieldset();
+
+	header("Content-disposition: attachment; filename=\"$game[id].sgf\"");
+
+	echo "(;FF[4]GM[Havannah]SZ[" . $sizes[$game['size']] . "]";
+	echo "PW[$game[player1]:$game[version1]]PB[$game[player2]:$game[version2]]";
+	foreach($moves as $i => $move)
+		echo ";" . ($i % 2 == 0 ? 'W' : 'B') . "[$move[position]]";
+	echo ")";
+
+	return false;
+}
 
 function playername($id, $players){
 	$names = array();
