@@ -34,15 +34,17 @@ function createuser($data, $user){
 
 	if($email && strlen($password) >=5){
 		$activatekey = randkey();
-		$res = $db->pquery("INSERT INTO users SET email = ?, password = ?, active = 0, activatekey = ?, apikey = ?",
+		$res = $db->pquery("INSERT INTO users SET email = ?, password = ?, active = 1, activatekey = ?, apikey = ?",
 			$email, md5($password), $activatekey, randkey());
 
 		if(!$res){
 			?>A user with this email already exists, either <a href="/">Login</a> or try <a href="/lostpass">password recovery</a>.<?
 		}elseif(mail($email, "$config[site_name] account creation", "Welcome to $config[site_name]. Your key is: $activatekey, or activate here: http://$_SERVER[HTTP_HOST]/activate?email=$email&key=$activatekey")){
-			?>An email has been sent to your email. Go to the <a href="/activate">Activation page</a> or click the link in your email.<?
+			return login($data, $user);
+
+/*			?>An email has been sent to your email. Go to the <a href="/activate">Activation page</a> or click the link in your email.<?
 			return true;
-		}else{
+*/		}else{
 			$db->pquery("DELETE FROM users WHERE userid = ?", $res->insertid());
 			?>An error occured sending an email to your account for activation, try again.<?
 		}
