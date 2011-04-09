@@ -61,9 +61,10 @@ loop_fork($parallel) {
 		players[1] = Object.const_get(game['p1cmd']).new
 		players[2] = Object.const_get(game['p2cmd']).new
 
+		randnum = rand(10000000)
 		players.each{|p|
 			p.time(game['timemove'], game['timegame'], game['timesims'])
-			p.boardsize(game['sizeparam'])
+			p.boardsize(game['sizeparam'], randnum)
 		}
 
 		players[1].params(game['p1config'])

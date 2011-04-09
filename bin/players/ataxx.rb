@@ -7,11 +7,94 @@ require 'players/player.rb'
 require 'lib.rb'
 
 class Ataxx < Player
-	class_attr_accessor :path, :exec
-	attr_class_accessor :path, :exec
+	class_attr_accessor :path, :exec, :boards
+	attr_class_accessor :path, :exec, :boards
 
 	@path = "/home/timo/code/test/asn4/code/src"
 	@exec = "ataxx"
+
+	@boards = ["
+weeeeeeb
+eeeeeeee
+eeeeeeee
+eeeeeeee
+eeeeeeee
+eeeeeeee
+eeeeeeee
+beeeeeew","
+wexeexeb
+eeeeeeee
+eeexxeee
+eeeeeeee
+eeeeeeee
+eeexxeee
+eeeeeeee
+bexeexew","
+weexxeeb
+eeeeeeee
+eexeexee
+xeeeeeex
+xeeeeeex
+eexeexee
+eeeeeeee
+beexxeew","
+weeeeeeb
+xeeeeeex
+exeeeexe
+eeexxeee
+eeexxeee
+exeeeexe
+xeeeeeex
+beeeeeew","
+weeeeeeb
+exexxexe
+eeeeeeee
+xeeeeeex
+xeeeeeex
+eeeeeeee
+exexxexe
+beeeeeew","
+beeeeeew
+eeeeeeee
+eeeeeeee
+eeeeeeee
+eeeeeeee
+eeeeeeee
+eeeeeeee
+weeeeeeb","
+bexeexew
+eeeeeeee
+eeexxeee
+eeeeeeee
+eeeeeeee
+eeexxeee
+eeeeeeee
+wexeexeb","
+beexxeew
+eeeeeeee
+eexeexee
+xeeeeeex
+xeeeeeex
+eexeexee
+eeeeeeee
+weexxeeb","
+beeeeeew
+xeeeeeex
+exeeeexe
+eeexxeee
+eeexxeee
+exeeeexe
+xeeeeeex
+weeeeeeb","
+beeeeeew
+exexxexe
+eeeeeeee
+xeeeeeex
+xeeeeeex
+eeeeeeee
+exexxexe
+weeeeeeb"]
+
 
 	class AtaxxClient
 		def initialize(cmdline)
@@ -52,18 +135,19 @@ class Ataxx < Player
 	def version
 		"Timothy's ATAXX!"
 	end
-	def boardsize(size)
+	def boardsize(size, randnum)
 		size = size.to_i
 
 		@c.cmd "i #{size}"
+		@c.cmd "s#{boards[randnum % boards.size]}"
 
-		board = []
-		size.times{ board << ['e']*size }
-		board[0][0] = 'w'
-		board[0][size-1] = 'b'
-		board[size-1][0] = 'b'
-		board[size-1][size-1] = 'w'
-		@c.cmd "s\n" + board.map{|l| l.join }.join("\n")
+#		board = []
+#		size.times{ board << ['e']*size }
+#		board[0][0] = 'w'
+#		board[0][size-1] = 'b'
+#		board[size-1][0] = 'b'
+#		board[size-1][size-1] = 'w'
+#		@c.cmd "s\n" + board.map{|l| l.join }.join("\n")
 	end
 	def time(move, game, sims) #ignores sims
 		@c.cmd "rt #{game}" if game > 0
