@@ -14,6 +14,7 @@
 	$refeverymove = false
 	$maxmoves = 1000
 	$finishmoves = ['resign', 'none', 'unknown']
+	$startstates = {}
 
 	while(ARGV.length > 0)
 		arg = ARGV.shift
@@ -39,7 +40,7 @@ require 'net/http'
 require 'json'
 
 log "benchmarking..."
-time_factor = 2; #scaletime($benchplayer.benchtime){ $benchplayer.benchmark }
+time_factor = scaletime($benchplayer.benchtime){ $benchplayer.benchmark }
 log "time_factor: " + time_factor.inspect
 
 
@@ -61,10 +62,13 @@ loop_fork($parallel) {
 		players[1] = Object.const_get(game['p1cmd']).new
 		players[2] = Object.const_get(game['p2cmd']).new
 
-		randnum = rand(10000000)
+		#choose a startstate if there is a list of them for this size
+		starts = $startstates[game['sizeparam']]
+		startstate = starts && starts[rand(starts.size)]
+
 		players.each{|p|
 			p.time(game['timemove'], game['timegame'], game['timesims'])
-			p.boardsize(game['sizeparam'], randnum)
+			p.boardsize(game['sizeparam'], startstate)
 		}
 
 		players[1].params(game['p1config'])
