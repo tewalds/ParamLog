@@ -175,8 +175,8 @@ $(function(){
 				str += '</tr>';
 				str += '<tr>';
 				str += '<th>Win rate</th>';
-				str += '<th>Low</th>';
 				str += '<th>High</th>';
+				str += '<th>Low</th>';
 				str += '<th>Wins</th>';
 				str += '<th>Losses</th>';
 				str += '<th>Ties</th>';
