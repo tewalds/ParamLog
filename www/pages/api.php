@@ -221,11 +221,11 @@ function add_moves($data, $user){
 	if(!$game)
 		return json_error('Invalid gameid');
 
-	$moves = json_decode($data['jsonmoves']);
+	$moves = json_decode($data['jsonmoves'], true);
 
 	foreach($moves as $move)
 		$db->pquery("INSERT INTO moves SET userid = ?, gameid = ?, movenum = ?, position = ?, side = ?,	value = ?, outcome = ?, timetaken = ?, work = ?, nodes = ?, comment = ?",
-			$user->userid, $data['gameid'], $move->movenum, $move->position, $move->side, $move->value, $move->outcome, $move->timetaken, $move->work, $move->nodes, $move->comment);
+			$user->userid, $data['gameid'], $move['movenum'], $move['position'], $move['side'], $move['value'], $move['outcome'], $move['timetaken'], $move['work'], $move['nodes'], $move['comment']);
 
 	$db->pquery("UPDATE games SET nummoves = nummoves + ? WHERE userid = ? && id = ?", count($moves), $user->userid, $data['gameid']);
 
