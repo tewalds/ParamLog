@@ -395,8 +395,6 @@ $('a.edittestcase').live('click', function(e){
 
 </script>
 
-Api Key: <?= $user->apikey ?><br>
-
 	<table width="100%">
 	<tr>
 		<th></td>
