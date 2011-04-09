@@ -90,3 +90,27 @@ function auth_api($key){
 	return new User($user);
 }
 
+function changepassword($user, $old, $new1, $new2){
+	global $db;
+
+	if(empty($old) || empty($new1) || empty($new2))
+		return echo_false("Must fill in all fields");
+
+	if($new1 != $new2)
+		return echo_false("New passwords must match");
+
+	if(strlen($new1) < 5)
+		return echo_false("New password is too short");
+
+	$row = $db->pquery("SELECT * FROM users WHERE userid = ? && password = ?", $user->userid, md5($old))->fetchrow();
+
+	if(!$row)
+		return echo_false("Wrong old password");
+
+	$row = $db->pquery("UPDATE users SET password = ?, apikey = ? WHERE userid = ?", md5($new1), randkey(), $user->userid)->affectedrows();
+
+	if(!$row)
+		return echo_false("Update failed.");
+
+	return true;
+}

@@ -112,7 +112,7 @@ function resetpassword($data, $user){
 	}
 
 	if($email && $key && $newpass){
-		$succ = $db->pquery("UPDATE users SET password = ? WHERE email = ? && activatekey = ?", md5($newpass), $email, $key)->affectedrows();
+		$succ = $db->pquery("UPDATE users SET password = ?, apikey = ? WHERE email = ? && activatekey = ?", md5($newpass), md5(randkey()), $email, $key)->affectedrows();
 		if($succ){
 			echo "Password reset, go <a href='/'>Login</a>";
 			return true;
@@ -122,6 +122,33 @@ function resetpassword($data, $user){
 	}
 
 	include("templates/resetpassword.php");
+	return true;
+}
+
+function account($input, $user){
+	global $db;
+
+?>
+Your API key is: <b><?= $user->apikey ?></b>.<br>
+Insert it into your worker configuration so it knows which account to save games for.<br>
+Changing your password will change your API key.<br>
+
+<br><br>
+<?
+	include("templates/changepassword.php");
+
+	return true;
+}
+
+function changepass($data, $user){
+	global $db;
+
+	if(changepassword($user, $data['oldpass'], $data['newpass'], $data['newpass2'])){
+		echo "Password changed successfully";
+		return true;
+	}
+
+	include("templates/changepassword.php");
 	return true;
 }
 

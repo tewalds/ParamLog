@@ -34,6 +34,10 @@ $router->add("POST","/lostpassword",  "account.php", "lostpassword",  'anon',  a
 $router->add("GET", "/resetpassword", "account.php", "resetpassword", 'anon',  array("email" => "string", "key" => "string", "newpass" => "string"));
 $router->add("POST","/resetpassword", "account.php", "resetpassword", 'anon',  array("email" => "string", "key" => "string", "newpass" => "string"));
 
+$router->add("GET",  "/account",           "account.php", "account",    'user', null);
+$router->add("POST", "/account/changepass","account.php", "changepass", 'user', array("oldpass" => "str", "newpass" => "str", "newpass2" => "str"));
+
+
 $router->add("GET", "/results",        "results.php", "showresults", 'user', null);
 $router->add("GET", "/results/data",   "results.php", "getdata",     'user', array("players" => "array", "baselines" => "array", "times" => "array", "sizes" => "array", "scale" => "bool"));
 $router->add("GET", "/results/hosts",  "results.php", "gethosts",    'user', null);
@@ -44,6 +48,7 @@ $router->add("GET", "/games/sgf",      "games.php", "gensgf",      'user', array
 
 $router->add("GET",  "/players",        "players.php", "players_list", 'user', null);
 $router->add("POST", "/players/save",   "players.php", "players_save", 'user', array("id" => "int", "type" => "int", "parent" => "int", "name" => "string", "params" => "string", "weight" => "int"));
+
 
 $router->add("GET", "/api/getwork",     "api.php", "getwork",        'api', null);
 $router->add("GET", "/api/lookup",      "api.php", "lookup_game_id", 'api', array("lookup" => "string"));

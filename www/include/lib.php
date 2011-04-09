@@ -26,6 +26,11 @@ function json_error($str){
 	return false;
 }
 
+function echo_false($str){
+	echo $str;
+	return false;
+}
+
 function h($var){
 	switch(gettype($var)){
 		case 'string': return htmlentities($var);
