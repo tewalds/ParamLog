@@ -39,7 +39,7 @@ require 'net/http'
 require 'json'
 
 log "benchmarking..."
-time_factor = scaletime($benchplayer.benchtime){ $benchplayer.benchmark }
+time_factor = 2; #scaletime($benchplayer.benchtime){ $benchplayer.benchmark }
 log "time_factor: " + time_factor.inspect
 
 
@@ -158,10 +158,12 @@ loop_fork($parallel) {
 		savegame = JSON.parse(res.body)
 
 		#save the moves
-		gamelog.each{|entry|
-			entry.merge!({ "apikey"  => $apikey, "gameid" => savegame['id'] })
-			Net::HTTP.post_form(URI.parse("#{$url}/api/addmove"), entry);
+		post = {
+			"apikey" => $apikey,
+			"gameid" => savegame['id'],
+			"jsonmoves" => gamelog.to_json,
 		}
+		Net::HTTP.post_form(URI.parse("#{$url}/api/addmoves"), post);
 
 		#save the result
 		result = {

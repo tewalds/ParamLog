@@ -211,6 +211,28 @@ function add_move($data, $user){
 	return false;
 }
 
+function add_moves($data, $user){
+	global $db;
+
+	if(!$data['gameid'])
+		return json_error('Missing gameid');
+
+	$game = $db->pquery("SELECT * FROM games WHERE userid = ? && id = ?", $user->userid, $data['gameid'])->fetchrow();
+	if(!$game)
+		return json_error('Invalid gameid');
+
+	$moves = json_decode($data['jsonmoves']);
+
+	foreach($moves as $move)
+		$db->pquery("INSERT INTO moves SET userid = ?, gameid = ?, movenum = ?, position = ?, side = ?,	value = ?, outcome = ?, timetaken = ?, work = ?, nodes = ?, comment = ?",
+			$user->userid, $data['gameid'], $move->movenum, $move->position, $move->side, $move->value, $move->outcome, $move->timetaken, $move->work, $move->nodes, $move->comment);
+
+	$db->pquery("UPDATE games SET nummoves = nummoves + ? WHERE userid = ? && id = ?", count($moves), $user->userid, $data['gameid']);
+
+	return false;
+}
+
+
 /*
  * outcome=1 -> player 1 wins, outcome=2 -> player 2 wins, outcome=3 -> tie game
  */
