@@ -33,7 +33,7 @@ class GTPPlayer < Player
 		parts << v[1] if v[0]
 		return parts.join ' '
 	end
-	def boardsize(size)
+	def boardsize(size, start)
 		r = @gtp.cmd "boardsize #{size}"
 		raise "GTP command failed: boardsize #{size}\n#{r[1]}" if !r[0]
 	end

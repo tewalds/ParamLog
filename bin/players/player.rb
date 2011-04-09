@@ -26,7 +26,7 @@ class Player
 	end
 
 	#set the boardsize
-	def boardsize(size)
+	def boardsize(size, start)
 		raise "Unimplemented boardsize method"
 	end
 

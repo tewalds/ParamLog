@@ -7,7 +7,7 @@ class NullPlayer < Player
 	def initialize; end
 	def quit; end
 	def version; ""; end
-	def boardsize(size); end
+	def boardsize(size, start); end
 	def time(move, game, sims); end
 	def params(param); end
 	def play(side, move); end
