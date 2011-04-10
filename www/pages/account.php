@@ -39,14 +39,16 @@ function createuser($data, $user){
 
 		if(!$res){
 			?>A user with this email already exists, either <a href="/">Login</a> or try <a href="/lostpass">password recovery</a>.<?
-		}elseif(mail($email, "$config[site_name] account creation", "Welcome to $config[site_name]. Your key is: $activatekey, or activate here: http://$_SERVER[HTTP_HOST]/activate?email=$email&key=$activatekey")){
+		}elseif($config['activation_required']){
+			if(mail($email, "$config[site_name] account creation", "Welcome to $config[site_name]. Your key is: $activatekey, or activate here: http://$_SERVER[HTTP_HOST]/activate?email=$email&key=$activatekey")){
+				?>An email has been sent to your email. Go to the <a href="/activate">Activation page</a> or click the link in your email.<?
+				return true;
+			}else{
+				$db->pquery("DELETE FROM users WHERE userid = ?", $res->insertid());
+				?>An error occured sending an email to your account for activation, try again.<?
+			}
+		}else{
 			return login($data, $user);
-
-/*			?>An email has been sent to your email. Go to the <a href="/activate">Activation page</a> or click the link in your email.<?
-			return true;
-*/		}else{
-			$db->pquery("DELETE FROM users WHERE userid = ?", $res->insertid());
-			?>An error occured sending an email to your account for activation, try again.<?
 		}
 	}elseif($password && strlen($password) < 5){
 		echo "Password too short, must be at least 5 characters";

@@ -8,5 +8,6 @@ $config = array(
 
 	'site_name' => "ParamLog",
 	'error_log' => false,
+	'activation_required' => false,
 );
 
