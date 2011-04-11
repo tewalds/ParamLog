@@ -170,13 +170,14 @@ $(function(){
 				str += '<tr>';
 				str += '<th rowspan="2">Player Name</th>';
 				str += '<th rowspan="2">Board Size</th>';
-				str += '<th colspan="3">Outcome</th>';
+				str += '<th colspan="4">Outcome</th>';
 				str += '<th colspan="4">Games</th>';
 				str += '</tr>';
 				str += '<tr>';
 				str += '<th>Win rate</th>';
 				str += '<th>High</th>';
 				str += '<th>Low</th>';
+				str += '<th>95% Error</th>';
 				str += '<th>Wins</th>';
 				str += '<th>Losses</th>';
 				str += '<th>Ties</th>';
@@ -189,7 +190,7 @@ $(function(){
 						str += '<td>' + (j == 0 ? data.options.series[i].label : '') + '</td>';
 						str += '<td>' + data.options.axes.xaxis.ticks[j] + '</td>';
 						for(var k = 1; k < data.data[i][j].length; k++)
-							str += '<td align="right">' + data.data[i][j][k].toFixed((k < 4 ? 2 : 0)) + '</td>';
+							str += '<td align="right">' + data.data[i][j][k].toFixed((k < 5 ? 2 : 0)) + '</td>';
 						str += '</tr>';
 					}
 				}
@@ -287,7 +288,7 @@ function getdata($input, $user){
 		foreach($data2 as $s => $row){
 			$row['total'] = $row['wins'] + $row['loss'] + $row['ties'];
 			$row['rate']  = ($row['total'] > 0 ? ($row['wins'] + $row['ties']/2.0)/$row['total'] : 0);
-			$row['err']   = ($row['total'] > 0 ? 2.0*sqrt($row['rate']*(1-$row['rate'])/$row['total']) : 0);
+			$row['err']   = ($row['total'] > 0 ? 1.96*sqrt($row['rate']*(1-$row['rate'])/$row['total']) : 0);
 			$row['lb']    = max(0, $row['rate'] - $row['err']);
 			$row['ub']    = min(1, $row['rate'] + $row['err']);
 			$data[$p][$s] = $row;
@@ -332,6 +333,7 @@ function getdata($input, $user){
 				'<tr><td>avg:</td><td>%.2f</td></tr>' .
 				'<tr><td>hi:</td><td>%.2f</td></tr>' .
 				'<tr><td>low:</td><td>%.2f</td></tr>' .
+				'<tr><td>95%:</td><td>%.2f</td></tr>' .
 				'<tr><td>wins:</td><td>%d</td></tr>' .
 				'<tr><td>losses:</td><td>%d</td></tr>' .
 				'<tr><td>ties:</td><td>%d</td></tr>' .
@@ -348,7 +350,7 @@ function getdata($input, $user){
 		$i = 0;
 		foreach($data2 as $s => $row)
 //			$line[] = round($row['rate']*100, 2);
-			$line[] = array(++$i, round($row['rate']*100,3), round($row['ub']*100,3), round($row['lb']*100,3), $row['wins'], $row['loss'], $row['ties'], $row['total']);
+			$line[] = array(++$i, round($row['rate']*100,3), round($row['ub']*100,3), round($row['lb']*100,3), round($row['err']*100, 3), $row['wins'], $row['loss'], $row['ties'], $row['total']);
 		$output[] = $line;
 		$options['series'][] = array('label' => h($players[$p]['name']));
 	}
