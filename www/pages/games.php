@@ -73,6 +73,12 @@ function showgame($input, $user){
 	global $db;
 
 	$game = $db->pquery("SELECT * FROM games WHERE userid = ? && id = ?", $user->userid, $input['id'])->fetchrow();
+
+	if(!$game){
+		echo "Bad Game ID";
+		return true;
+	}
+
 	$moves = $db->pquery("SELECT * FROM moves WHERE userid = ? && gameid = ? ORDER BY movenum", $user->userid, $input['id'])->fetchrowset();
 
 	$players = $db->pquery("SELECT id, name, parent FROM players WHERE userid = ?", $user->userid)->fetchrowset('id');
@@ -146,6 +152,28 @@ function gensgf($input, $user){
 	foreach($moves as $i => $move)
 		echo ";" . ($i % 2 == 0 ? 'W' : 'B') . "[$move[position]]";
 	echo ")";
+
+	return false;
+}
+
+function deletegame($input, $user){
+	global $db;
+
+	$row = $db->pquery("SELECT * FROM games WHERE userid = ? && id = ?", $user->userid, $input['id'])->fetchrow();
+
+	if($row){
+		if($row['saved']){
+			$outcome = ($row['outcomeref'] ? $row['outcomeref'] : ($row['outcome1'] == $row['outcome2'] ? $row['outcome1'] : 0));
+			$db->pquery("UPDATE results SET p1wins = p1wins - ?, p2wins = p2wins - ?, ties = ties - ?, numgames = numgames - 1 WHERE
+				userid = ? && player1 = ? && player2 = ? && size = ? && time = ?",
+				(int)($outcome == 1), (int)($outcome == 2), (int)($outcome == 3), $row['userid'], $row['player1'], $row['player2'], $row['size'], $row['time']);
+		}
+
+		$db->pquery("DELETE FROM games WHERE id = ?", $row['id']);
+		$db->pquery("DELETE FROM moves WHERE gameid = ?", $row['id']);
+	}
+
+	redirect("/games/show?id=$input[id]");
 
 	return false;
 }

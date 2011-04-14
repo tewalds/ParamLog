@@ -8,7 +8,7 @@ priority based on error
 - use ucb with big exploration constant instead?
 
 remove a game from the log
-- add a field to the games table to show whether a game is added to the results table
+- add the interface and route for pages/games.php:deletegame()
 
 graph winning rate by things other than boardsize
 - time limits
