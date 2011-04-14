@@ -1,45 +1,32 @@
 
-   1. design the database schema that allows the above features
-   2. add the concept of a user to the system, along with authentication by username/password and api keys
-   3. build a basic interface including menus, login, signup, etc
-   4. write some basic management interfaces to add/edit/delete baselines, time limits, board sizes, and tests
-   5. improve the api's to save additional information about each game played
-   6. rewrite the tournament script to be game independent and use the new apis from step 5
-   7. clean up the reporting interface and make use the of the new information from the previous steps
-   8. improve the game selection
+test groups have parameters to prepend to test cases
 
-- multi user
-- game independent
-- GTP tournament
-  - parameters by config file or by GTP
-  - multiple programs, not just self play
-  - support referee program/gtp command to determine the outcome
-- 4 dimensions:
-  - board size
-  - time limit
-  - baseline player
-  - test parameter
-    - give a set of valid values worth testing
-- play games to keep priorities in sync
-- automatic weight adjustment
-  - UCB
-  - minimize error
-- game database
-  - program versions, commands and parameters
-  - time, outcomes according to each player and referee
-  - moves and values about the moves
-- graph results
-  - win rate by any of the 4 dimensions
-  - win rate by version
-  - win rate by move number - ie is this good for the beginning, or end?
-- game records
-  - basic game search?
-  - output as sgf
-- automatic promotion of a test to a baseline
-  - threshold for promotion in number of tests and win rate
-  - integrate with ParamILS
+add boardsizes and time limits
 
-Setup Fuego, with GnuGo as one of the baselines
+priority based on error
+- how to deal with all wins/losses gives no error?
+- use ucb with big exploration constant instead?
+
+remove a game from the log
+- add a field to the games table to show whether a game is added to the results table
+
+graph winning rate by things other than boardsize
+- time limits
+- baseline
+- graph by elo instead of winning rate
+
+graph against move number, single game or aggregated
+- work
+- memory
+- value
+- outcome
+
+graph over time/version?
+
+automatic promotion?
+
+Error bar renderer
+
 
 
 graph libraries:
