@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 10, 2011 at 04:12 PM
+-- Generation Time: Apr 14, 2011 at 03:17 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.4-2ubuntu5.3
 
@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS `games` (
   `outcome1` tinyint(4) NOT NULL,
   `outcome2` tinyint(4) NOT NULL,
   `outcomeref` tinyint(4) NOT NULL,
+  `saved` tinyint(4) NOT NULL,
   `version1` varchar(64) NOT NULL,
   `version2` varchar(64) NOT NULL,
   `host` varchar(255) NOT NULL,
@@ -41,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `games` (
   KEY `timestamp` (`timestamp`),
   KEY `lookup` (`lookup`),
   KEY `result` (`player1`,`player2`,`size`,`time`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=41006 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -64,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `moves` (
   `comment` varchar(255) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `userid` (`userid`,`gameid`,`movenum`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2213514 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -83,7 +84,7 @@ CREATE TABLE IF NOT EXISTS `players` (
   `comment` text NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `userid` (`userid`,`type`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=133 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -136,7 +137,7 @@ CREATE TABLE IF NOT EXISTS `sizes` (
   `size` varchar(32) NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `userid` (`userid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=11 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -154,7 +155,7 @@ CREATE TABLE IF NOT EXISTS `times` (
   `sims` int(11) NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `userid` (`userid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -173,5 +174,4 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY  (`userid`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `apikey` (`apikey`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=9 ;
-
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
