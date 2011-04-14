@@ -156,31 +156,11 @@ loop_fork($parallel) {
 			"outcomeref" => outcome[0],
 			"version1" => versions[1],
 			"version2" => versions[2],
-			"host" => `hostname`.strip
-		}
-		res = Net::HTTP.post_form(URI.parse("#{$url}/api/savegame"), result);
-		savegame = JSON.parse(res.body)
-
-		#save the moves
-		post = {
-			"apikey" => $apikey,
-			"gameid" => savegame['id'],
+			"host" => `hostname`.strip,
+			"saveresult" => true,
 			"jsonmoves" => gamelog.to_json,
 		}
-		Net::HTTP.post_form(URI.parse("#{$url}/api/addmoves"), post);
-
-		#save the result
-		result = {
-			"apikey"  => $apikey,
-			"player1" => game['p1id'],
-			"player2" => game['p2id'],
-			"size"    => game['sizeid'],
-			"time"    => game['timeid'],
-			"outcome" => (outcome[0] != 0 ? outcome[0] : (outcome[1] == outcome[2] ? outcome[1] : 0)), #0 is unknown, 1 is p1, 2 is p2, 3 is draw
-		}
-		if(result['outcome'] != 0)
-			Net::HTTP.post_form(URI.parse("#{$url}/api/saveresult"), result);
-		end
+		Net::HTTP.post_form(URI.parse("#{$url}/api/savegame"), result);
 	rescue
 		puts "An error occurred: #{$!}"
 		puts $@

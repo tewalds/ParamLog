@@ -169,9 +169,14 @@ function lookup_game_id($data, $user){
 function save_game($data, $user){
 	global $db;
 
+	$outcome = ($data['outcomeref'] ? $data['outcomeref'] : ($data['outcome1'] == $data['outcome2'] ? $data['outcome1'] : 0));
+
 	if($data['id']){
-		$db->pquery("UPDATE games SET outcome1 = ?, outcome2 = ?, outcomeref = ? WHERE userid = ? && id = ?",
-			$data['outcome1'], $data['outcome2'], $data['outcomeref'], $user->userid, $data['id']);
+		$affected = $db->pquery("UPDATE games SET outcome1 = ?, outcome2 = ?, outcomeref = ? WHERE userid = ? && id = ? && saved = 0",
+			$data['outcome1'], $data['outcome2'], $data['outcomeref'], $user->userid, $data['id'])->affectedrows();
+
+		if(!$affected)
+			$data['saveresult'] = 0;
 	}else{
 		if(!$data['player1'] || !$data['player2'] || !$data['size'] || !$data['time'])
 			return json_error("Missing params");
@@ -179,12 +184,30 @@ function save_game($data, $user){
 		if(!$data['host'])
 			$data['host'] = gethostbyaddr($_SERVER["REMOTE_ADDR"]);
 
+		if($data['jsonmoves'])
+			$moves = json_decode($data['jsonmoves'], true);
+		else
+			$moves = array();
+
 		$data['id'] = $db->pquery("INSERT INTO games SET userid = ?, lookup = ?, player1 = ?, player2 = ?, size = ?, time = ?,
-			timestamp = ?, outcome1 = ?, outcome2 = ?, outcomeref = ?, version1 = ?, version2 = ?, host = ?",
-			$user->userid, $data['lookup'], $data['player1'], $data['player2'], $data['size'], $data['time'], time(),
-			$data['outcome1'], $data['outcome2'], $data['outcomeref'], $data['version1'], $data['version2'], $data['host'])->insertid();
+			timestamp = ?, nummoves = ?, outcome1 = ?, outcome2 = ?, outcomeref = ?, version1 = ?, version2 = ?, host = ?, saved = ?",
+			$user->userid, $data['lookup'], $data['player1'], $data['player2'], $data['size'], $data['time'], time(), count($moves),
+			$data['outcome1'], $data['outcome2'], $data['outcomeref'], $data['version1'], $data['version2'], $data['host'], (int)($data['saveresult'] && $outcome > 0))->insertid();
+
+		foreach($moves as $move)
+			$db->pquery("INSERT INTO moves SET userid = ?, gameid = ?, movenum = ?, position = ?, side = ?,	value = ?, outcome = ?, timetaken = ?, work = ?, nodes = ?, comment = ?",
+				$user->userid, $data['id'], $move['movenum'], $move['position'], $move['side'], $move['value'], $move['outcome'], $move['timetaken'], $move['work'], $move['nodes'], $move['comment']);
 	}
 	$row = $db->pquery("SELECT * FROM games WHERE userid = ? && id = ?", $user->userid, $data['id'])->fetchrow();
+
+	if($outcome > 0 && $data['saveresult']){
+		$db->pquery("INSERT INTO results SET userid = ?, player1 = ?, player2 = ?, size = ?, time = ?, weight = 1, p1wins = ?, p2wins = ?, ties = ?, numgames = 1
+			ON DUPLICATE KEY UPDATE p1wins = p1wins + ?, p2wins = p2wins + ?, ties = ties + ?, numgames = numgames + 1",
+			$user->userid, $row['player1'], $row['player2'], $row['size'], $row['time'],
+			(int)($outcome == 1), (int)($outcome == 2), (int)($outcome == 3),
+			(int)($outcome == 1), (int)($outcome == 2), (int)($outcome == 3));
+	}
+
 	echo json(h($row));
 	return false;
 }
