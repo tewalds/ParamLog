@@ -131,7 +131,7 @@ function account($input, $user){
 	global $db;
 
 ?>
-Your API key is: <b><?= $user->apikey ?></b>.<br>
+Your API key is: <b><?= $user->apikey ?></b><br>
 Insert it into your worker configuration so it knows which account to save games for.<br>
 Changing your password will change your API key.<br>
 
