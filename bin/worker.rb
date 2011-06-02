@@ -16,23 +16,32 @@
 	$finishmoves = ['resign', 'none', 'unknown']
 	$startstates = {}
 
+	loadconfig = false
 	while(ARGV.length > 0)
 		arg = ARGV.shift
 		case arg
 		when "-p", "--parallel"  then $parallel = ARGV.shift.to_i
-		when "-c", "--config"    then require ARGV.shift
 		when "-h", "--help"      then
 			puts "Run a worker process that plays games between players"
 			puts "based on a database of players, baselines, sizes and times"
-			puts "Usage: #{$0} [<options>]"
+			puts "Usage: #{$0} [<options>] <config file>"
 			puts "  -p --parallel   Number of games to run in parallel [#{$parallel}]"
-			puts "  -c --config     Include this config file"
 			puts "  -h --help       Print this help"
 			exit;
 		else
-			puts "Unknown argument #{arg}"
-			exit;
+			if(loadconfig)
+				puts "Unknown argument #{arg}"
+				exit;
+			else
+				require arg
+				loadconfig = true
+			end
 		end
+	end
+
+	if(!loadconfig)
+		puts "No config file specified"
+		exit
 	end
 
 
