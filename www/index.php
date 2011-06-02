@@ -49,6 +49,9 @@ $router->add("GET", "/games/sgf",      "games.php", "gensgf",      'user', array
 $router->add("GET",  "/players",        "players.php", "players_list", 'user', null);
 $router->add("POST", "/players/save",   "players.php", "players_save", 'user', array("id" => "int", "type" => "int", "parent" => "int", "name" => "string", "params" => "string", "weight" => "int"));
 
+$router->add("GET",  "/timesize",        "settings.php", "timesize_list", 'user', null);
+$router->add("POST", "/timesize/savetime",   "settings.php", "timesize_savetime", 'user', array("id" => "int", "name" => "string", "move" => "int", "game" => "int", "sims" => "int", "weight" => "int"));
+$router->add("POST", "/timesize/savesize",   "settings.php", "timesize_savesize", 'user', array("id" => "int", "name" => "string", "size" => "int", "weight" => "int"));
 
 $router->add("GET", "/api/getwork",     "api.php", "getwork",        'api', null);
 $router->add("GET", "/api/lookup",      "api.php", "lookup_game_id", 'api', array("lookup" => "string"));
