@@ -248,7 +248,7 @@ $('a.newtestgroup').live('click', function(e){
 	var tr = buildrow( { nameclass : 'spacer', links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>' });
 	var tds = tr.children();
 	$(tds[1]).editbox({name: "name"});
-//	$(tds[2]).editbox({name: "params"});
+	$(tds[2]).editbox({name: "params"});
 	$(tds[3]).editbox({name: "weight", value: 1, width: 80});
 
 	var parent = $(this).attr('parent');
@@ -278,6 +278,7 @@ $('a.edittestgroup').live('click', function(e){
 	tds.save();
 
 	$(tds[1]).editbox({name: "name"});
+	$(tds[2]).editbox({name: "params"});
 	$(tds[3]).editbox({name: "weight"});
 
 	var links = $('<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>');
@@ -289,6 +290,7 @@ $('a.edittestgroup').live('click', function(e){
 				alert(data.error);
 			}else{
 				$(tds[1]).html(data.name)
+				$(tds[2]).html(data.params)
 				$(tds[3]).html(data.weight)
 				$(tds[4]).revert();
 			}

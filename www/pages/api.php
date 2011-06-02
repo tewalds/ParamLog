@@ -82,7 +82,7 @@ function getwork($data, $user){
 			p2test.id     as p2id,
 			p2prog.params as p2cmd,
 			p1base.params as p2config,
-			p2test.params as p2test,
+			CONCAT(p2group.params, p2test.params) as p2test,
 			IF(results.numgames IS NULL, 0, results.numgames / (
 				p1prog.weight *
 				p1base.weight *
