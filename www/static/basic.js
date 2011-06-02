@@ -1,18 +1,31 @@
 
-function copyInputRow(tablename, nextrow){
-	var tableobj = document.getElementById(tablename);
-	var numrows=tableobj.rows.length;
+jQuery.fn.save = function() {
+	return this.each(function() {
+		$.data(this, 'savedvalue', $(this).html());
+	});
+};
+jQuery.fn.revert = function() {
+	return this.each(function() {
+		$(this).html($.data(this, 'savedvalue'));
+	});
+};
+jQuery.fn.editbox = function(options) {
+	return this.each(function() {
+		var value = $(this).html();
+		var input = $('<input>').val(value);
+		input.width(options.width || "100%");
+		$.each(options, function(k,v){
+			input.attr(k, v);
+		});
+		$(this).html(input);
+	});
+};
+jQuery.fn.input_obj = function(ret) {
+	ret = ret || { };
+	this.find('input').each(function() {
+		ret[this.name] = this.value;
+	});
+	return ret;
+};
 
-	var nextrow=document.getElementById(nextrow);
-	var newrow= nextrow.previousSibling.cloneNode(true); //first row
-
-	var inputs = newrow.getElementsByTagName('input');
-
-	for(i = 0; i < inputs.length; i++)
-		inputs[i].value = '';
-
-	tableobj.tBodies[0].insertBefore(newrow, nextrow);
-
-	return newrow;
-}
 
