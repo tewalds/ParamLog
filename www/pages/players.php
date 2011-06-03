@@ -43,7 +43,7 @@ function players_list($input, $user){
 
 function buildrow(data){
 	var str = '';
-	str += '<tr class="l">';
+	str += '<tr class="' + (data.rowclass || 'l') + '">';
 	str += '<td>';
 	if(data.id)     str += '<input type="hidden" name="id" value="' + data.id + '">';
 	if(data.parent) str += '<input type="hidden" name="parent" value="' + data.parent + '">';
@@ -116,7 +116,7 @@ $('a.edithuman').live('click', function(e){
 $('a.newprogram').live('click', function(e){
 	e.preventDefault();
 
-	var tr = buildrow( { links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>' });
+	var tr = buildrow( { rowclass: 'l3', links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>' });
 	var tds = tr.children();
 	$(tds[1]).editbox({name: "name"});
 	$(tds[2]).editbox({name: "params"});
@@ -129,12 +129,12 @@ $('a.newprogram').live('click', function(e){
 			if(data.error){
 				alert(data.error);
 			}else{
-				tr.replaceWith('<tr class="l"><td><input type="hidden" name="id" value="' + data.id + '"></td>' +
+				tr.replaceWith('<tr class="l3"><td><input type="hidden" name="id" value="' + data.id + '"></td>' +
 					'<td>' + data.name + '</td><td>' + data.params + '</td><td>' + data.weight + '</td>' +
 					'<td><a class="editprogram" href="#">Edit</a></td></tr>' +
-					'<tr class="l2"><td></td><td class="spacer" colspan="3"><b>Baselines:</b></td>' +
+					'<tr class="l3"><td></td><td class="spacer" colspan="3"><b>Baselines:</b></td>' +
 					'<td><a class="newbaseline" href="#" parent="' + data.id + '">New Baseline</a></td></tr>' +
-					'<tr class="l2"><td></td><td class="spacer" colspan="3"><b>Test Groups:</b></td>' +
+					'<tr class="l3"><td></td><td class="spacer" colspan="3"><b>Test Groups:</b></td>' +
 					'<td><a class="newtestgroup" href="#" parent="' + data.id + '">New Test Group</a></td></tr>'
 					);
 			}
@@ -183,7 +183,7 @@ $('a.editprogram').live('click', function(e){
 $('a.newbaseline').live('click', function(e){
 	e.preventDefault();
 
-	var tr = buildrow( { links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>' });
+	var tr = buildrow( { rowclass: 'l2', links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>' });
 	var tds = tr.children();
 	$(tds[1]).editbox({name: "name"});
 	$(tds[2]).editbox({name: "params"});
@@ -197,7 +197,7 @@ $('a.newbaseline').live('click', function(e){
 			if(data.error){
 				alert(data.error);
 			}else{
-				tr.replaceWith(buildrow($.extend(data, { nameclass: 'spacer', links : '<a class="editbaseline" href="#">Edit</a>' })));
+				tr.replaceWith(buildrow($.extend(data, { rowclass: 'l2', nameclass: 'spacer', links : '<a class="editbaseline" href="#">Edit</a>' })));
 			}
 		}, 'json');
 	});
@@ -245,7 +245,7 @@ $('a.editbaseline').live('click', function(e){
 $('a.newtestgroup').live('click', function(e){
 	e.preventDefault();
 
-	var tr = buildrow( { nameclass : 'spacer', links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>' });
+	var tr = buildrow( { rowclass: 'l2', nameclass : 'spacer', links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>' });
 	var tds = tr.children();
 	$(tds[1]).editbox({name: "name"});
 	$(tds[2]).editbox({name: "params"});
@@ -259,7 +259,7 @@ $('a.newtestgroup').live('click', function(e){
 			if(data.error){
 				alert(data.error);
 			}else{
-				tr.replaceWith(buildrow($.extend(data, { nameclass: 'spacer', links : '<a class="newtestcase" href="#" parent="' + data.id + '">New Value</a>' })));
+				tr.replaceWith(buildrow($.extend(data, { rowclass: 'l2', nameclass: 'spacer', links : '<a class="newtestcase" href="#" parent="' + data.id + '">New Value</a>' })));
 			}
 		}, 'json');
 	});
@@ -306,7 +306,7 @@ $('a.edittestgroup').live('click', function(e){
 $('a.newtestcase').live('click', function(e){
 	e.preventDefault();
 
-	var tr = buildrow( { nameclass: 'spacer2', links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>' });
+	var tr = buildrow( { rowclass: 'l1', nameclass: 'spacer2', links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>' });
 	var tds = tr.children();
 	$(tds[1]).editbox({name: "name"});
 	$(tds[2]).editbox({name: "params"});
@@ -320,7 +320,7 @@ $('a.newtestcase').live('click', function(e){
 			if(data.error){
 				alert(data.error);
 			}else{
-				tr.replaceWith(buildrow($.extend(data, { nameclass: 'spacer2', links : '<a class="edittestcase" href="#">Edit</a>' })));
+				tr.replaceWith(buildrow($.extend(data, { rowclass: 'l1', nameclass: 'spacer2', links : '<a class="edittestcase" href="#">Edit</a>' })));
 			}
 		}, 'json');
 	});
@@ -375,7 +375,7 @@ $('a.edittestcase').live('click', function(e){
 		<th width="80px">Weight</td>
 		<th width="140px"></td>
 	</tr>
-	<tr class="l2" id="humans"><td></td>
+	<tr class="l4" id="humans"><td></td>
 		<td colspan="3"><b>Humans:</b></td>
 		<td><a class="newhuman" href="#">New Human</a></td>
 	</tr>
@@ -389,13 +389,13 @@ $('a.edittestcase').live('click', function(e){
 		<td><a class="edithuman" href="#">Edit</a></td>
 		</tr>
 	<?	} ?>
-	<tr class="l2" id="programs"><td></td>
+	<tr class="l4" id="programs"><td></td>
 		<td colspan="3"><b>Programs:</b></td>
 		<td><a class="newprogram" href="#">New Program</a></td>
 	</tr>
 	<? foreach($programs as $pid){
 		$player = $players[$pid]; ?>
-		<tr class="l">
+		<tr class="l3">
 		<td>
 			<input type="hidden" name="id" value="<?= $player['id'] ?>">
 			<input type="hidden" name="parent" value="<?= $player['parent'] ?>">
@@ -405,13 +405,13 @@ $('a.edittestcase').live('click', function(e){
 		<td><?= $player['weight'] ?></td>
 		<td><a class="editprogram" href="#">Edit</a></td>
 		</tr>
-		<tr class="l2" id="baseline<?= $pid ?>"><td></td>
+		<tr class="l3" id="baseline<?= $pid ?>"><td></td>
 			<td class="spacer" colspan="3"><b>Baselines:</b></td>
 			<td><a class="newbaseline" href="#" parent="<?= $pid ?>">New Baseline</a></td>
 		</tr>
 		<? foreach($baselines[$pid] as $bid){
 			$player = $players[$bid]; ?>
-			<tr class="l">
+			<tr class="l2">
 			<td>
 				<input type="hidden" name="id" value="<?= $player['id'] ?>">
 				<input type="hidden" name="parent" value="<?= $player['parent'] ?>">
@@ -422,13 +422,13 @@ $('a.edittestcase').live('click', function(e){
 			<td><a class="editbaseline" href="#">Edit</a></td>
 			</tr>
 		<? } ?>
-		<tr class="l2" id="testgroups<?= $pid ?>"><td></td>
+		<tr class="l3" id="testgroups<?= $pid ?>"><td></td>
 			<td class="spacer" colspan="3"><b>Test Groups:</b></td>
 			<td><a class="newtestgroup" href="#" parent="<?= $pid ?>">New Test Group</a></td>
 		</tr>
 		<? foreach($testgroups[$pid] as $gid){
 			$player = $players[$gid]; ?>
-			<tr class="l">
+			<tr class="l2">
 			<td>
 				<input type="hidden" name="id" value="<?= $player['id'] ?>">
 				<input type="hidden" name="parent" value="<?= $player['parent'] ?>">
@@ -440,7 +440,7 @@ $('a.edittestcase').live('click', function(e){
 			</tr>
 			<? foreach($testcases[$gid] as $tid){
 				$player = $players[$tid]; ?>
-				<tr class="l">
+				<tr class="l1">
 				<td>
 					<input type="hidden" name="id" value="<?= $player['id'] ?>">
 					<input type="hidden" name="parent" value="<?= $player['parent'] ?>">
