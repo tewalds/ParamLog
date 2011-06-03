@@ -88,8 +88,8 @@ class MysqlDb {
 		if(substr($query, 0, 6) == "SELECT" || substr($query, 0, 4) == "SHOW"){
 			$numrows = mysql_num_rows($result);//this is mysql unique
 			if(substr($query, 7, 19) == "SQL_CALC_FOUND_ROWS"){//this is mysql unique
-				$res = mysql_query("SELECT FOUNDROWS()");
-				$countrows = mysql_fetch_field($res, 0, 0);
+				$res = mysql_query("SELECT FOUND_ROWS()", $this->con);
+				$countrows = (int)mysql_result($res, 0);
 			}
 		}
 
