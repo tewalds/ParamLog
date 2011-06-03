@@ -328,7 +328,7 @@ function getdata($input, $user){
 		),
 		'highlighter' => array(
 			'tooltipAxes' => 'y',
-			'yvalues' => 7,
+			'yvalues' => 8,
 			'formatString' => '<table class="jqplot-highlighter">' .
 				'<tr><td>avg:</td><td>%.2f</td></tr>' .
 				'<tr><td>hi:</td><td>%.2f</td></tr>' .
