@@ -71,6 +71,61 @@ function redirect($loc){
 	exit;
 }
 
+function url($link, $data){
+	$connector = (strpos($link, "?")===false ? "?" : "&");
+
+	$parts = array();
+	foreach($data as $k => $v){
+		if(is_array($v)){
+			foreach($v as $a)
+				$parts[] = urlencode($k . "[]") . "=" . urlencode($a);
+		}else{
+			$parts[] = urlencode($k) . "=" . urlencode($v);
+		}
+	}
+
+	if(count($parts))
+		return $link . $connector . implode("&amp;", $parts);
+	else
+		return $link;
+}
+
+function pagelist($link, $page, $numpages){
+	$pagesinlist = 3;
+
+	if($numpages <= 0)
+		$numpages=1;
+
+	$connector = (strpos($link, "?")===false ? "?" : "&");
+	$link .= $connector . "page=";
+
+	$start = ($page+1 > $pagesinlist ? ($page+1) - $pagesinlist : 1);
+	$finish = ($page+$pagesinlist < $numpages ? ($page+1) + $pagesinlist : $numpages);
+
+	$str = array();
+
+	if($page > 0){
+		if($start > 1)
+			$str[] = "<a href='$link" . "0'>|&lt;</a>";
+		$str[] = "<a href='$link" . ($page-1) . "'>&lt;</a>";
+	}
+
+	for($i = $start; $i <= $finish; $i++){
+		if($i-1 == $page)
+			$str[] = "[$i]";
+		else
+			$str[] = "<a href='$link" . ($i-1) . "'>$i</a>";
+	}
+
+	if($page < $numpages-1){
+		$str[] = "<a href='$link" . ($page+1) . "'>></a>";
+		if($finish < $numpages)
+			$str[] = "<a href='$link" . ($numpages-1) . "'>>|</a>";
+	}
+
+	return implode("\n", $str);
+}
+
 function selected($id, $list){
 	return (in_array($id, $list) ? " selected='selected'" : "");
 }
