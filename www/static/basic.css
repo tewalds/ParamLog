@@ -1,7 +1,11 @@
 
-tr.h, tr.f, th, td.h, td.f { background-color: #DDDDDD; }
+tr.h, tr.f, th, td.h, td.f { background-color: #D7D7D7; }
 tr.l1, td.l1, tr.l, td.l   { background-color: #F7F7F7; }
 tr.l2, td.l2   { background-color: #EFEFEF; }
+tr.l3, td.l3   { background-color: #E7E7E7; }
+tr.l4, td.l4   { background-color: #DFDFDF; }
+tr.l5, td.l5   { background-color: #D7D7D7; }
+tr.l6, td.l6   { background-color: #CFCFCF; }
 td.spacer { padding-left: 25px; }
 td.spacer2 { padding-left: 50px; }
 
