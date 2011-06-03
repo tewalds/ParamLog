@@ -13,7 +13,7 @@ class Gambler < GTPPlayer
 		@params = ""
 		@gtp = nil
 	end
-	def boardsize(size)
+	def boardsize(size, start)
 		@boardsize = size
 	end
 	def time(move, game, sims)
