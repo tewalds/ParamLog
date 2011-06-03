@@ -5,7 +5,8 @@ function home($data, $user){
 <table><tr><td valign="top">
 
 <h1>Welcome to ParamLog</h1>
-ParamLog is an open source web-based distributed parameter tuning and game logging system. 
+
+ParamLog is a Distributed Tournament Runner, Game Logging, Game Analysis and Parameter Tuning Engine for Two Player Games.
 The code is available at <a href="https://github.com/tewalds/ParamLog">https://github.com/tewalds/ParamLog</a>.<br>
 <br>
 Setup players and tests on the web interface, and start up worker processes on arbitrarily many machines
