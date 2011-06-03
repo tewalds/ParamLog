@@ -21,16 +21,23 @@ function getgames($input, $user){
 		}
 	}
 
+	$pagesize = 100;
+	$page = $input['page'];
+	unset($input['page']);
 
 	if(empty($input['players']) && empty($input['baselines']) && empty($input['sizes']) && empty($input['times'])){
-		$data = $db->pquery("SELECT * FROM games WHERE userid = ? && timestamp > UNIX_TIMESTAMP()-3600 ORDER BY id", $user->userid)->fetchrowset();
+		$res = $db->pquery("SELECT SQL_CALC_FOUND_ROWS * FROM games WHERE userid = ? ORDER BY id DESC LIMIT ?, ?", $user->userid, $pagesize*$page, $pagesize);
+		$data = $res->fetchrowset();
+		$pages = ceil($res->countrows()/$pagesize);
 	}else if(empty($input['players']) || empty($input['baselines']) || empty($input['sizes']) || empty($input['times'])){
 		echo "You must select options from all categories to see any results!";
 		return true;
 	}else{
 		$ids = array_merge($input['players'], $input['baselines']);
-		$data = $db->pquery("SELECT * FROM games WHERE userid = ? && player1 IN ? && player2 IN ? && time IN ? && size IN ? ORDER BY id LIMIT 100",
-				$user->userid, $ids, $ids, $input['times'], $input['sizes'])->fetchrowset();
+		$res = $db->pquery("SELECT SQL_CALC_FOUND_ROWS * FROM games WHERE userid = ? && player1 IN ? && player2 IN ? && time IN ? && size IN ? ORDER BY id DESC LIMIT ?, ?",
+				$user->userid, $ids, $ids, $input['times'], $input['sizes'], $pagesize*$page, $pagesize);
+		$data = $res->fetchrowset();
+		$pages = ceil($res->countrows()/$pagesize);
 	}
 
 	$times = $db->pquery("SELECT id, name FROM times WHERE userid = ?", $user->userid)->fetchfieldset();
@@ -48,6 +55,7 @@ function getgames($input, $user){
 		<th>Moves</th>
 		<th>Winner</th>
 		<th>Host</th>
+		<th>Date</th>
 	</tr>
 
 <?	foreach($data as $row){ ?>
@@ -60,8 +68,11 @@ function getgames($input, $user){
 			<td><?= $row['nummoves'] ?></td>
 			<td><?= $outcomes[($row['outcomeref'] ? $row['outcomeref'] : ($row['outcome1'] == $row['outcome2'] ? $row['outcome1'] : 0))] ?></td>
 			<td><?= (strpos($row['host'], '.') ? substr($row['host'], 0, strpos($row['host'], '.')) : $row['host']) ?></td>
+			<td><?= date("n-j-Y, H:i", $row['timestamp']) ?></td>
 		</tr>
 <?	} ?>
+
+	<tr><th align="right" colspan="9">Page: <?= pagelist(url("/games", $input), $page, $pages) ?></th></tr>
 	</table>
 
 <?
