@@ -52,7 +52,7 @@ class GTPPlayer < Player
 		raise "GTP command failed: play #{sides[side]} #{move}\n#{r[1]}" if !r[0]
 	end
 	def genmove(side)
-		r @gtp.cmd("genmove #{sides[side]}")
+		r = @gtp.cmd("genmove #{sides[side]}")
 		raise "GTP command failed: genmove #{sides[side]}\n#{r[1]}" if !r[0]
 		return r[1].split[0]
 	end
