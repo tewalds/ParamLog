@@ -13,6 +13,7 @@ function skin($user, $body){
 		$menu['Account Settings'] = "/account";
 		$menu['Logout'] = "/logout";
 	}
+	$menu['Help'] = "/help";
 ?>
 <html>
 	<head>
