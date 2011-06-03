@@ -46,11 +46,11 @@ $('a.newtime').live('click', function(e){
 
 	var tr = buildtime({ links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a></td></tr>'});
 	var tds = tr.children();
-	$(tds[1]).editbox({name: "name"});
-	$(tds[2]).editbox({name: "move"});
-	$(tds[3]).editbox({name: "game"});
-	$(tds[4]).editbox({name: "sims"});
-	$(tds[5]).editbox({name: "weight"});
+	$(tds[1]).editbox({name: "name", width: 150});
+	$(tds[2]).editbox({name: "move", width: 100});
+	$(tds[3]).editbox({name: "game", width: 100});
+	$(tds[4]).editbox({name: "sims", width: 100});
+	$(tds[5]).editbox({name: "weight", width: 100});
 
 	tr.find('a.save').click(function(e){
 		e.preventDefault();
@@ -78,11 +78,11 @@ $('a.edittime').live('click', function(e){
 
 	tds.save();
 
-	$(tds[1]).editbox({name: "name"});
-	$(tds[2]).editbox({name: "move"});
-	$(tds[3]).editbox({name: "game"});
-	$(tds[4]).editbox({name: "sims"});
-	$(tds[5]).editbox({name: "weight"});
+	$(tds[1]).editbox({name: "name", width: 150});
+	$(tds[2]).editbox({name: "move", width: 100});
+	$(tds[3]).editbox({name: "game", width: 100});
+	$(tds[4]).editbox({name: "sims", width: 100});
+	$(tds[5]).editbox({name: "weight", width: 100});
 
 	var links = $('<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>');
 	links.filter("a.save").click(function(e){
@@ -109,9 +109,9 @@ $('a.newsize').live('click', function(e){
 
 	var tr = buildsize({ links : '<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a></td></tr>'});
 	var tds = tr.children();
-	$(tds[1]).editbox({name: "name"});
-	$(tds[2]).editbox({name: "size"});
-	$(tds[3]).editbox({name: "weight"});
+	$(tds[1]).editbox({name: "name", width: 150});
+	$(tds[2]).editbox({name: "size", width: 100});
+	$(tds[3]).editbox({name: "weight", width: 100});
 
 	tr.find('a.save').click(function(e){
 		e.preventDefault();
@@ -139,9 +139,9 @@ $('a.editsize').live('click', function(e){
 
 	tds.save();
 
-	$(tds[1]).editbox({name: "name"});
-	$(tds[2]).editbox({name: "size"});
-	$(tds[3]).editbox({name: "weight"});
+	$(tds[1]).editbox({name: "name", width: 150});
+	$(tds[2]).editbox({name: "size", width: 100});
+	$(tds[3]).editbox({name: "weight", width: 100});
 
 	var links = $('<a class="save" href="#">Save</a> <a class="cancel" href="#">Cancel</a>');
 	links.filter("a.save").click(function(e){
