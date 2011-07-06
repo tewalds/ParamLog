@@ -115,6 +115,9 @@ function showresults($input, $user){
 <br>
 <a id="showlongdata" href="#">Show</a> | <a id="hidelongdata" href="#">Hide</a> Long Data<br>
 <div id="longdata"></div>
+<br>
+<a id="showlatexgraph" href="#">Show</a> | <a id="hidelatexgraph" href="#">Hide</a> Latex Graph<br>
+<textarea id="latexgraph" style="width:900px; height: 300px"></textarea>
 
 <script>
 $.jqplot.config.enablePlugins = true;
@@ -122,11 +125,14 @@ $.jqplot.config.enablePlugins = true;
 $(function(){
 	$('#shortdata').hide();
 	$('#longdata').hide();
+	$('#latexgraph').hide();
 
 	$('#showshortdata').click(function(e){ e.preventDefault(); $('#shortdata').show(); });
 	$('#hideshortdata').click(function(e){ e.preventDefault(); $('#shortdata').hide(); });
 	$('#showlongdata').click(function(e){ e.preventDefault(); $('#longdata').show(); });
 	$('#hidelongdata').click(function(e){ e.preventDefault(); $('#longdata').hide(); });
+	$('#showlatexgraph').click(function(e){ e.preventDefault(); $('#latexgraph').show(); });
+	$('#hidelatexgraph').click(function(e){ e.preventDefault(); $('#latexgraph').hide(); });
 
 	$('#showgraph').click(function(e){
 		e.preventDefault();
@@ -196,6 +202,29 @@ $(function(){
 				}
 				str += "</table>";
 				$('#longdata').html(str);
+
+				$('#latexgraph').empty();
+				var str = "\\begin{tikzpicture}\n" +
+					"\\begin{axis}[\n" +
+					"	xlabel=Board Size,\n" +
+					"	ylabel=Win Rate (\\%),\n" +
+					"	xtick={" + data.options.axes.xaxis.ticks.join(',') + "},\n" +
+					"	ymin=0, ymax=100,\n" +
+					"	minor y tick num=1,\n" +
+					"	extra y ticks={50},\n" +
+					"	extra y tick style={grid=major},\n" +
+					"]\n";
+
+				for(var i = 1; i < data.data.length; i++){
+					str += "\\addplot coordinates { ";
+					for(var j = 0; j < data.data[i].length; j++){
+						str += "(" + data.options.axes.xaxis.ticks[j] + "," + data.data[i][j][1].toFixed(2) + ") ";
+					}
+					str += "}; \\addlegendentry{" + data.options.series[i].label + "}\n";
+				}
+				str += "\\end{axis}\n";
+				str += "\\end{tikzpicture}\n";
+				$('#latexgraph').val(str);
 			}
 		}, 'json');
 	});
@@ -267,7 +296,7 @@ function getdata($input, $user){
 
 	usort($rawdata, 'cmpname');
 
-	$sizes = $db->pquery("SELECT id, name FROM sizes WHERE userid = ? && id IN ? ORDER BY name", $user->userid, $input['sizes'])->fetchfieldset();
+	$sizes = $db->pquery("SELECT id, size FROM sizes WHERE userid = ? && id IN ? ORDER BY name", $user->userid, $input['sizes'])->fetchfieldset();
 
 	$defaults = array();
 	foreach($sizes as $s => $n)
