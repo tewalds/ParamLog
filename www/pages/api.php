@@ -189,6 +189,9 @@ function save_game($data, $user){
 		else
 			$moves = array();
 
+		if($data['timestamp'] == 0)
+			$data['timestamp'] = time();
+
 		$data['id'] = $db->pquery("INSERT INTO games SET userid = ?, lookup = ?, player1 = ?, player2 = ?, size = ?, time = ?,
 			timestamp = ?, nummoves = ?, outcome1 = ?, outcome2 = ?, outcomeref = ?, version1 = ?, version2 = ?, host = ?, saved = ?",
 			$user->userid, $data['lookup'], $data['player1'], $data['player2'], $data['size'], $data['time'], time(), count($moves),
