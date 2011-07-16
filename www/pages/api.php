@@ -197,9 +197,14 @@ function save_game($data, $user){
 			$user->userid, $data['lookup'], $data['player1'], $data['player2'], $data['size'], $data['time'], time(), count($moves),
 			$data['outcome1'], $data['outcome2'], $data['outcomeref'], $data['version1'], $data['version2'], $data['host'], (int)($data['saveresult'] && $outcome > 0))->insertid();
 
+		//insert all the moves in a single query
+		$parts = array();
 		foreach($moves as $move)
-			$db->pquery("INSERT INTO moves SET userid = ?, gameid = ?, movenum = ?, position = ?, side = ?,	value = ?, outcome = ?, timetaken = ?, work = ?, nodes = ?, comment = ?",
+			$parts[] = $db->prepare("(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				$user->userid, $data['id'], $move['movenum'], $move['position'], $move['side'], $move['value'], $move['outcome'], $move['timetaken'], $move['work'], $move['nodes'], $move['comment']);
+
+		if(count($parts))
+			$db->query("INSERT INTO moves (userid, gameid, movenum, position, side, value, outcome, timetaken, work, nodes, comment) VALUES " . implode(", ", $parts));
 	}
 	$row = $db->pquery("SELECT * FROM games WHERE userid = ? && id = ?", $user->userid, $data['id'])->fetchrow();
 
