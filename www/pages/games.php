@@ -26,9 +26,12 @@ function getgames($input, $user){
 	unset($input['page']);
 
 	if(empty($input['players']) && empty($input['baselines']) && empty($input['sizes']) && empty($input['times'])){
-		$res = $db->pquery("SELECT SQL_CALC_FOUND_ROWS * FROM games WHERE userid = ? ORDER BY id DESC LIMIT ?, ?", $user->userid, $pagesize*$page, $pagesize);
+		$res = $db->pquery("SELECT * FROM games WHERE userid = ? ORDER BY id DESC LIMIT ?, ?", $user->userid, $pagesize*$page, $pagesize);
 		$data = $res->fetchrowset();
-		$pages = ceil($res->countrows()/$pagesize);
+
+		$countrows = $db->pquery("SELECT count(*) FROM games WHERE userid = ?", $user->userid)->fetchfield();
+
+		$pages = ceil($countrows/$pagesize);
 	}else if(empty($input['players']) || empty($input['baselines']) || empty($input['sizes']) || empty($input['times'])){
 		echo "You must select options from all categories to see any results!";
 		return true;
@@ -197,3 +200,4 @@ function playername($id, $players){
 	}
 	return implode(" > ", array_reverse($names));
 }
+
