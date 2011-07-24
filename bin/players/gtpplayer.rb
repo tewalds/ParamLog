@@ -31,7 +31,7 @@ class GTPPlayer < Player
 		parts = []
 		parts << n[1] if n[0]
 		parts << v[1] if v[0]
-		return parts.join ' '
+		return parts.join(' ')
 	end
 	def boardsize(size, start)
 		r = @gtp.cmd "boardsize #{size}"
