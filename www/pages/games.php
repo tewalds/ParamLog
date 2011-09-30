@@ -201,3 +201,49 @@ function playername($id, $players){
 	return implode(" > ", array_reverse($names));
 }
 
+
+function game_move_list($input, $user){
+	global $db;
+
+	$players = $db->pquery("SELECT id, type, parent FROM players WHERE userid = ?", $user->userid)->fetchrowset('id');
+
+	$testcases = array();
+	foreach($players as $p){
+		if($p['type'] == P_TESTCASE){
+			undefset($testcases[$p['parent']], array());
+			$testcases[$p['parent']][] = $p['id'];
+		}
+	}
+
+	foreach($input['players'] as $k => $p){
+		if($players[$p]['type'] == P_TESTGROUP){
+			unset($input['players'][$k]);
+			foreach($testcases[$p] as $t)
+				$input['players'][] = $t;
+		}
+	}
+
+	if(empty($input['players']) || empty($input['baselines']) || empty($input['sizes']) || empty($input['times'])){
+		echo "You must select options from all categories to see any results!";
+		return true;
+	}
+	$ids = array_merge($input['players'], $input['baselines']);
+	$res = $db->pquery("SELECT id FROM games WHERE userid = ? && player1 IN ? && player2 IN ? && time IN ? && size IN ?",
+			$user->userid, $ids, $ids, $input['times'], $input['sizes']);
+	$gameids = $res->fetchfieldset();
+
+	$moves = $db->pquery("SELECT gameid, position FROM moves WHERE userid = ? && gameid IN ? ORDER BY gameid, movenum", $user->userid, $gameids)->fetchrowset();
+
+	$gameid = $moves[0]['gameid'];
+	foreach($moves as $move){
+		if($gameid != $move['gameid']){
+			$gameid = $move['gameid'];
+			echo "\n";
+		}
+		echo $move['position'] . " ";
+	}
+	echo "\n";
+
+	return false;
+}
+

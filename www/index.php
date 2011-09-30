@@ -44,6 +44,7 @@ $router->add("GET", "/results/data",   "results.php", "getdata",     'user', arr
 $router->add("GET", "/results/hosts",  "results.php", "gethosts",    'user', null);
 
 $router->add("GET", "/games",          "games.php", "getgames",    'user', array("players" => "array", "baselines" => "array", "times" => "array", "sizes" => "array", 'page' => 'int'));
+$router->add("GET", "/games/movelist", "games.php", "game_move_list",'user', array("players" => "array", "baselines" => "array", "times" => "array", "sizes" => "array", 'page' => 'int'));
 $router->add("GET", "/games/show",     "games.php", "showgame",    'user', array('id' => "int"));
 $router->add("GET", "/games/sgf",      "games.php", "gensgf",      'user', array('id' => "int"));
 
