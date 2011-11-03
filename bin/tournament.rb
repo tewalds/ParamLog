@@ -94,7 +94,7 @@ def play_game(n, p1, p2)
 			#ask for a move
 			print "genmove #{turnstrings[turn]}: ";
 			time = timer {
-				ret = gtp[turn].cmd("genmove #{turnstrings[turn]}\n")[2..-3];
+				ret = gtp[turn].cmd("genmove #{turnstrings[turn]}\n")[1].strip;
 			}
 			puts ret
 
@@ -110,7 +110,7 @@ def play_game(n, p1, p2)
 		}
 		}
 
-		ret = gtp[1].cmd("havannah_winner")[2..-3];
+		ret = gtp[1].cmd("havannah_winner")[1].strip;
 		turn = turnstrings.index(ret);
 
 		log.write("# Winner: #{ret}, #{$players[turn]}\n") if log
@@ -181,7 +181,7 @@ end
 			$results[j][i] += 1;
 		end
 	}
-	
+
 #start output
 	out = "\n\n";
 	out << "#{$msg}\n" if $msg;
