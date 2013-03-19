@@ -228,14 +228,15 @@ function game_move_list($input, $user){
 		return true;
 	}
 	$ids = array_merge($input['players'], $input['baselines']);
-	$res = $db->pquery("SELECT id FROM games WHERE userid = ? && player1 IN ? && player2 IN ? && time IN ? && size IN ?",
+	$query = $db->prepare("SELECT moves.gameid, moves.position FROM games, moves WHERE games.id = moves.gameid && games.userid = ? && games.player1 IN ? && games.player2 IN ? && games.time IN ? && games.size IN ? ORDER By games.id, moves.movenum",
 			$user->userid, $ids, $ids, $input['times'], $input['sizes']);
-	$gameids = $res->fetchfieldset();
 
-	$moves = $db->pquery("SELECT gameid, position FROM moves WHERE userid = ? && gameid IN ? ORDER BY gameid, movenum", $user->userid, $gameids)->fetchrowset();
+	$res = $db->query($query, false);
 
-	$gameid = $moves[0]['gameid'];
-	foreach($moves as $move){
+	header("Content-Type: text/text");
+
+	$gameid = -1;
+	while($move = $res->fetchrow()){
 		if($gameid != $move['gameid']){
 			$gameid = $move['gameid'];
 			echo "\n";
